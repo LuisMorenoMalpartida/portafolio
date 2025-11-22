@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+// Se ha eliminado el import directo para evitar errores de compilación
+// La librería se cargará dinámicamente vía CDN dentro del componente ContactModal
 import { 
   Github, 
   Linkedin, 
@@ -217,17 +219,66 @@ const NavBar = ({ activeSection, scrollToSection, mobileMenuOpen, setMobileMenuO
   </nav>
 );
 
+// --- COMPONENTE CONTACT MODAL ACTUALIZADO (EMAILJS CON CDN) ---
 const ContactModal = ({ isOpen, onClose }) => {
-  const [message, setMessage] = useState("");
-  
+  const formRef = useRef();
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null); // 'success' | 'error' | null
+  const [emailJsLoaded, setEmailJsLoaded] = useState(false);
+
+  // --- REEMPLAZA ESTOS VALORES CON LOS TUYOS DE EMAILJS ---
+  // Regístrate en https://www.emailjs.com/ para obtenerlos gratis
+  const SERVICE_ID = "service_tu_id"; 
+  const TEMPLATE_ID = "template_tu_id";
+  const PUBLIC_KEY = "tu_public_key";
+
+  // Cargar EmailJS dinámicamente
+  useEffect(() => {
+    if (isOpen && !window.emailjs) {
+      const script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
+      script.async = true;
+      script.onload = () => {
+        console.log('EmailJS Loaded');
+        setEmailJsLoaded(true);
+      };
+      document.body.appendChild(script);
+    } else if (window.emailjs) {
+      setEmailJsLoaded(true);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const subject = encodeURIComponent("Contacto desde Portafolio Web");
-    const body = encodeURIComponent(message);
-    window.location.href = `mailto:${YOUR_EMAIL}?subject=${subject}&body=${body}`;
-    onClose();
+    setLoading(true);
+    setStatus(null);
+
+    if (!window.emailjs) {
+      console.error("EmailJS no está cargado aún.");
+      setStatus('error');
+      setLoading(false);
+      return;
+    }
+
+    // Envío automático usando window.emailjs (cargado desde CDN)
+    window.emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY)
+      .then((result) => {
+          console.log(result.text);
+          setLoading(false);
+          setStatus('success');
+          e.target.reset(); // Limpiar formulario
+          // Cerrar automáticamente después de 3 segundos
+          setTimeout(() => {
+            onClose();
+            setStatus(null);
+          }, 3000);
+      }, (error) => {
+          console.log(error.text);
+          setLoading(false);
+          setStatus('error');
+      });
   };
 
   return (
@@ -242,37 +293,81 @@ const ContactModal = ({ isOpen, onClose }) => {
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Campo Nombre */}
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Nombre</label>
+            <input 
+              type="text" 
+              name="user_name" 
+              required
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+              placeholder="Tu nombre completo"
+            />
+          </div>
+
+          {/* Campo Correo */}
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Tu Correo Electrónico</label>
+            <input 
+              type="email" 
+              name="user_email" 
+              required
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+              placeholder="ejemplo@correo.com"
+            />
+          </div>
+
+          {/* Campo Mensaje */}
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-2">
               Tu mensaje (Máx 1000 caracteres)
             </label>
             <textarea
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none resize-none h-40"
+              name="message"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none resize-none h-32"
               placeholder="Hola Luis, me interesa tu perfil..."
               maxLength={1000}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
               required
             ></textarea>
-            <div className="text-right text-xs text-slate-500 mt-1">
-              {message.length}/1000
-            </div>
           </div>
           
+          {/* Mensajes de Estado */}
+          {status === 'success' && (
+            <div className="p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm text-center font-semibold">
+              ¡Mensaje enviado correctamente!
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm text-center font-semibold">
+              Error al enviar. Verifica tu conexión o las credenciales de EmailJS.
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2">
             <button 
               type="button"
               onClick={onClose}
               className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition-colors"
+              disabled={loading}
             >
               Cancelar
             </button>
             <button 
               type="submit"
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2"
+              disabled={loading || !emailJsLoaded}
+              className={`bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 ${loading || !emailJsLoaded ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              <Send className="w-4 h-4" /> Enviar Correo
+              {loading ? (
+                <>
+                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                   Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" /> Enviar Correo
+                </>
+              )}
             </button>
           </div>
         </form>
