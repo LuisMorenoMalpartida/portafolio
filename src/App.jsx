@@ -93,6 +93,19 @@ const CV_DATA = {
 
   experience: [
     {
+      role: "Desarrollador Full Stack & QA Tester",
+      company: "AM CONSULTORÍA",
+      period: "2025 - Presente", // Puedes ajustar la fecha exacta
+      desc: "Desarrollo de aplicación SPA integral para gestión de proyectos y aseguramiento de calidad.",
+      achievements: [
+        "Full Stack: Construcción de arquitectura SPA con Bootstrap 5 y JS (ES6+), simulando Backend con LocalStorage.",
+        "Algoritmos: Implementación de Dashboard con Chart.js y Kanban con funcionalidad Drag-and-Drop.",
+        "QA: Diseño de lógica de validación (Boundary Value Analysis) para prevenir inyección de datos.",
+        "Testing: Ejecución de pruebas Cross-browser y depuración de Critical Path.",
+        "Innovación: Desarrollo de módulo 'Diagnóstico IA' para predicción de riesgos en tiempo real."
+      ]
+    },
+    {
       role: "Líder y Coordinador de Proyectos Web",
       company: "ICSM Instituto Científico Minero",
       period: "2024 - 2025",
@@ -102,7 +115,7 @@ const CV_DATA = {
       role: "Programador Junior Web",
       company: "ARTE IDEAS",
       period: "Feb 2025 - Jun 2025",
-      desc: "Desarrollo de interfaces con HTML, CSS, JS y WordPress. Backend con PHP, MySQL y JQuery. Ejecución de Testing de Integración para APIs y Endpoints. Uso de metodología SCRUM."
+      desc: "Desarrollo de interfaces con HTML, CSS, JS y WordPress. Backend con PHP, MySQL y JQuery. Ejecución de Testing de Integración para APIs y Endpoints."
     }
   ],
   
@@ -145,6 +158,14 @@ const CV_DATA = {
       }
     ],
     jobs: [
+    {
+        title: "Constancia de Prácticas - Ing. Software con IA", // [cite: 80, 83]
+        issuer: "AM CONSULTORÍA", // [cite: 79, 92]
+        year: "Jun 2025 - Nov 2025", // 
+        desc: "Desarrollo de interfaz web y sistema interno, implementación de módulos de Inteligencia Artificial y ejecución de Testing.", // 
+        status: "completed"
+      },
+
       {
         title: "Certificado de Trabajo - ICSM",
         issuer: "Instituto Científico Minero",
