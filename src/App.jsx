@@ -1,596 +1,161 @@
 import React, { useState, useEffect, useRef } from 'react';
-// Se ha eliminado el import directo para evitar errores de compilación
-// La librería se cargará dinámicamente vía CDN dentro del componente ContactModal
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import { 
-  Github, 
-  Linkedin, 
-  Mail, 
-  Terminal, 
-  Cpu, 
-  Code, 
-  Brain, 
-  MessageSquare, 
-  Send, 
-  ExternalLink, 
-  Star, 
-  GitFork, 
-  ChevronDown, 
-  Menu, 
-  X,
-  User,
-  Briefcase,
-  Award,
-  Smartphone,
-  ShieldCheck,
-  FileText,
-  FolderOpen,
-  Clock,
-  Globe,
-  Database,
-  Layout,
-  Settings
+  Github, Linkedin, Mail, Terminal, Code, Cpu, 
+  ExternalLink, Briefcase, FolderOpen, ArrowRight, BookOpen
 } from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // --- CONFIGURACIÓN DEL USUARIO ---
 const GITHUB_USERNAME = "LuisMorenoMalpartida"; 
-const YOUR_NAME = "Luis Enrique Moreno Malpartida";
-const YOUR_TITLE = "Ing. Software con IA | Full Stack & Mobile | QA Automation";
-const YOUR_EMAIL = "gus6bmp@gmail.com";
+const YOUR_NAME = "LUIS MORENO";
+const YOUR_TITLE = "INGENIERO DE SOFTWARE CON I.A"; //[cite: 1]
+const YOUR_EMAIL = "gus6bmp@gmail.com"; //[cite: 1]
+const YOUR_PHONE = "+51 912439638"; //[cite: 1]
 
-// --- ENLACES A DRIVE ---
-const DRIVE_CURSOS = "https://drive.google.com/drive/folders/178JiAyjgCZB0eWFwjyC1zOAu3ABzVtJ0?usp=sharing";
-const DRIVE_TRABAJOS = "https://drive.google.com/drive/folders/1cxZm8fYROaZRxGy_zDO5gDo6nR_pOEvI?usp=sharing";
+// -----------------------------------------------------------
+// --- ELIGE AQUÍ LOS PROYECTOS QUE QUIERES MOSTRAR ---
+// Escribe el nombre EXACTO del repositorio tal como está en GitHub
+// -----------------------------------------------------------
+const SELECTED_REPOS = [
+  "Altera-Labs-360",
+  "QA-Station-Pro",
+  "MisRestaurantes",
+  "Fogon-Gaucho"
+];
 
-// --- DATOS DEL CV ---
+// --- DATOS DEL CV LUIS MORENO ---
 const CV_DATA = {
-  about: "Estudiante avanzado de Ingeniería de Software con IA. Experto en desarrollo Full Stack y Mobile (Flutter/Dart). Me especializo en Aseguramiento de Calidad (QA) y Testing Automatizado para garantizar productos robustos. Cuento con experiencia liderando equipos bajo metodología SCRUM y aplicando Inteligencia Artificial en sectores como la minería.",
-  
-  // Habilidades actualizadas con niveles porcentuales
-  detailedSkills: {
-    languages: [
-      { name: "Español", level: "Nativo" },
-      { name: "Inglés", level: "B1 - Básico" }
-    ],
-    programming: [
-      { name: "Python", level: 90 },
-      { name: "JavaScript", level: 85 },
-      { name: "PHP", level: 80 },
-      { name: "MySQL", level: 80 },
-      { name: "Java", level: 75 },
-      { name: "Lua", level: 60 },
-      { name: "Visual Basic (VBA)", level: 60 }
-    ],
-    frameworks: [
-      { name: "React", level: 85 },
-      { name: "Node.js", level: 80 },
-      { name: "Laravel", level: 80 },
-      { name: "Bootstrap", level: 85 },
-      { name: "Django", level: 75 },
-      { name: "Express", level: 75 },
-      { name: "Vite", level: 80 },
-      { name: "TypeScript", level: 70 },
-      { name: "Flask", level: 70 }
-    ],
-    tools: [
-      { name: "GitHub / Git", level: 90 },
-      { name: "HTML / CSS", level: 95 },
-      { name: "Jira / Trello / Notion", level: 90 },
-      { name: "Inteligencia Artificial (IA)", level: 85 },
-      { name: "Android Studio", level: 75 },
-      { name: "Office", level: 95 },
-      { name: "Discord", level: 100 }
-    ],
-    qa: [
-      { name: "Diseño de Test Cases", level: 90 },
-      { name: "Pruebas Funcionales/Regresión", level: 90 },
-      { name: "Inspección de Navegador (F12)", level: 95 },
-      { name: "Postman (APIs)", level: 85 },
-      { name: "Selenium (Web Automation)", level: 75 },
-      { name: "JMeter (Performance)", level: 70 },
-      { name: "PHPUnit", level: 65 }
-    ]
-  },
-
+  about: "Ingeniero de Software con especialización en IA y experiencia en desarrollo Full Stack bajo metodología SCRUM[cite: 1]. Perfil proactivo y orientado a resultados, enfocado en la entrega de productos de alta calidad mediante la aplicación de metodologías de Testing y Aseguramiento de Calidad (QA), incluyendo pruebas funcionales, de regresión y herramientas automatizadas para garantizar la robustez del sistema[cite: 1].",
+  skills: [
+    { category: "Lenguajes", items: ["Python", "Java", "JavaScript", "TypeScript", "PHP", "HTML/CSS"] }, //[cite: 1]
+    { category: "Frameworks & Libs", items: ["React", "Next.js", "Laravel", "Tailwind CSS", "FastAPI", "GSAP", "Flutter"] }, //[cite: 1]
+    { category: "Base de Datos & Cloud", items: ["MySQL", "MongoDB", "PostgreSQL", "Supabase", "Neon", "AWS (Básico)", "Azure (Básico)"] }, //[cite: 1]
+    { category: "QA, DevOps & Tools", items: ["Selenium", "Postman", "JMeter", "PHPUnit", "Docker", "Vercel", "Jira", "Scrum"] } //[cite: 1]
+  ],
   experience: [
     {
-      role: "Desarrollador Full Stack & QA Tester",
-      company: "AM CONSULTORÍA",
-      period: "2025 - Presente", // Puedes ajustar la fecha exacta
-      desc: "Desarrollo de aplicación SPA integral para gestión de proyectos y aseguramiento de calidad.",
-      achievements: [
-        "Full Stack: Construcción de arquitectura SPA con Bootstrap 5 y JS (ES6+), simulando Backend con LocalStorage.",
-        "Algoritmos: Implementación de Dashboard con Chart.js y Kanban con funcionalidad Drag-and-Drop.",
-        "QA: Diseño de lógica de validación (Boundary Value Analysis) para prevenir inyección de datos.",
-        "Testing: Ejecución de pruebas Cross-browser y depuración de Critical Path.",
-        "Innovación: Desarrollo de módulo 'Diagnóstico IA' para predicción de riesgos en tiempo real."
-      ]
+      role: "Programador Junior | Líder de equipo", //[cite: 1]
+      company: "ALTERA FINANCE", //[cite: 1]
+      period: "Feb 2026 - Actualidad", //[cite: 1]
+      desc: "Desarrollo Frontend y Backend con Next.js, PostgreSQL, Neon, Flutter y FastAPI[cite: 1]. Liderazgo de equipos en modalidad Squads autónomos, supervisando avances, manejando APIs, endpoints y pruebas de testing[cite: 1]."
     },
     {
-      role: "Líder y Coordinador de Proyectos Web",
-      company: "ICSM Instituto Científico Minero",
-      period: "2024 - 2025",
-      desc: "Full Developer (Frontend/Backend). Dirección de equipo bajo metodología SCRUM para la construcción de plataformas web. Gestión de entregables y aseguramiento de calidad."
+      role: "Programador Junior Web Full Stack", //[cite: 1]
+      company: "AM CONSULTORIA", //[cite: 1]
+      period: "Jun 2025 - Nov 2025", //[cite: 1]
+      desc: "Proyecto Full Stack de gestión de proyectos con tablero Kanban interactivo, visualización de datos, validaciones avanzadas y testing responsive[cite: 1]. Implementación de un módulo de IA para análisis de riesgos y predicción de fallos en cronogramas[cite: 1]."
     },
     {
-      role: "Programador Junior Web",
-      company: "ARTE IDEAS",
-      period: "Feb 2025 - Jun 2025",
-      desc: "Desarrollo de interfaces con HTML, CSS, JS y WordPress. Backend con PHP, MySQL y JQuery. Ejecución de Testing de Integración para APIs y Endpoints."
+      role: "Programador Junior Web", //[cite: 1]
+      company: "ARTE IDEAS", //[cite: 1]
+      period: "Feb 2025 - Jun 2025", //[cite: 1]
+      desc: "Desarrollo de interfaz de usuario con HTML, CSS, JavaScript y WordPress[cite: 1]. Backend con PHP, MySQL y JQuery. Realización de pruebas de APIs/Endpoints (Testing de Integración) bajo metodología SCRUM[cite: 1]."
+    },
+    {
+      role: "Líder y coordinador de proyectos web", //[cite: 1]
+      company: "ICSM Instituto Científico Minero", //[cite: 1]
+      period: "2024 - 2025", //[cite: 1]
+      desc: "Full Developer (Frontend - Backend). Dirección de un equipo de desarrollo para la construcción de la página web utilizando la metodología SCRUM[cite: 1]."
     }
   ],
-  
-  certifications: {
-    courses: [
-      {
-        title: "IA y Machine Learning en la Minería",
-        issuer: "Especialización Técnica",
-        year: "2025",
-        desc: "Aplicación de algoritmos de aprendizaje automático para la optimización de procesos mineros.",
-        status: "in_process" 
-      },
-      {
-        title: "Desarrollo Web Full Stack",
-        issuer: "Especialización Avanzada",
-        year: "2025",
-        desc: "Dominio de tecnologías modernas Frontend y Backend para aplicaciones escalables.",
-        status: "in_process" 
-      },
-      {
-        title: "Idioma Inglés (Nivel B1)",
-        issuer: "Certificación de Idiomas",
-        year: "2025",
-        desc: "Formación en habilidades comunicativas, lectura y escritura en inglés técnico.",
-        status: "in_process"
-      },
-      {
-        title: "Ingeniería de Software con IA",
-        issuer: "Senati",
-        year: "2022 - Presente",
-        desc: "Formación profesional en desarrollo de software, algoritmos avanzados e implementación de inteligencia artificial.",
-        status: "completed"
-      },
-      {
-        title: "Dibujante Autocad (Básico - Avanzado)",
-        issuer: "Unimaster",
-        year: "2024",
-        desc: "Diseño técnico y modelado asistido por computadora.",
-        status: "completed"
-      }
-    ],
-    jobs: [
+  education: [
     {
-        title: "Constancia de Prácticas - Ing. Software con IA", // [cite: 80, 83]
-        issuer: "AM CONSULTORÍA", // [cite: 79, 92]
-        year: "Jun 2025 - Nov 2025", // 
-        desc: "Desarrollo de interfaz web y sistema interno, implementación de módulos de Inteligencia Artificial y ejecución de Testing.", // 
-        status: "completed"
-      },
-
-      {
-        title: "Certificado de Trabajo - ICSM",
-        issuer: "Instituto Científico Minero",
-        year: "2024-2025",
-        desc: "Constancia de liderazgo en proyectos web y desarrollo Full Stack.",
-        status: "completed"
-      },
-      {
-        title: "Certificado de Trabajo - ARTE IDEAS",
-        issuer: "ARTE IDEAS",
-        year: "2025",
-        desc: "Constancia de desempeño como Programador Junior Web.",
-        status: "completed"
-      }
-    ]
-  }
+      degree: "Carrera de Ingeniería de Software con IA", //[cite: 1]
+      institution: "Senati (Independencia - Lima)", //[cite: 1]
+      period: "2022 - 2025 (Egresado)" //[cite: 1]
+    },
+    {
+      degree: "Dibujante Autocad (Básico - Intermedio - Avanzado)", //[cite: 1]
+      institution: "Unimaster", //[cite: 1]
+      period: "2024" //[cite: 1]
+    }
+  ]
 };
 
-// --- COMPONENTES ---
-
-const NavBar = ({ activeSection, scrollToSection, mobileMenuOpen, setMobileMenuOpen }) => (
-  <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between h-16">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
-          <Brain className="h-8 w-8 text-cyan-400" />
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
-            Luis.AI
-          </span>
-        </div>
-        
-        <div className="hidden md:block">
-          <div className="ml-10 flex items-baseline space-x-4">
-            {['Sobre mí', 'Proyectos', 'Experiencia', 'Certificados', 'Habilidades', 'Contacto'].map((item) => (
-              <button
-                key={item}
-                onClick={() => scrollToSection(item.toLowerCase().replace(' ', '-'))}
-                className="text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-all"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="md:hidden">
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-300 hover:text-white">
-            {mobileMenuOpen ? <X /> : <Menu />}
+const NavBar = ({ scrollToSection }) => (
+  <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-zinc-800 transition-all">
+    <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="text-white font-bold tracking-tighter text-xl flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
+        <Terminal className="w-5 h-5" />
+        <span>LM.DEV</span>
+      </div>
+      <div className="hidden md:flex gap-8 text-sm font-medium font-mono text-zinc-400">
+        {['Proyectos', 'Experiencia', 'Educación', 'Skills'].map((item) => (
+          <button 
+            key={item} 
+            onClick={() => scrollToSection(item.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))}
+            className="hover:text-white transition-colors uppercase tracking-widest"
+          >
+            // {item}
           </button>
-        </div>
+        ))}
       </div>
+      <button 
+        onClick={() => document.getElementById('contacto').scrollIntoView({behavior:'smooth'})}
+        className="bg-white text-black px-4 py-2 text-sm font-bold hover:bg-zinc-200 transition-colors"
+      >
+        CONTACTAR
+      </button>
     </div>
-
-    {mobileMenuOpen && (
-      <div className="md:hidden bg-slate-900 border-b border-slate-800">
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-           {['Sobre mí', 'Proyectos', 'Experiencia', 'Certificados', 'Habilidades', 'Contacto'].map((item) => (
-              <button
-                key={item}
-                onClick={() => {
-                  scrollToSection(item.toLowerCase().replace(' ', '-'));
-                  setMobileMenuOpen(false);
-                }}
-                className="text-slate-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
-              >
-                {item}
-              </button>
-            ))}
-        </div>
-      </div>
-    )}
   </nav>
 );
 
-// --- COMPONENTE CONTACT MODAL ACTUALIZADO (EMAILJS CON CDN) ---
-const ContactModal = ({ isOpen, onClose }) => {
-  const formRef = useRef();
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null); // 'success' | 'error' | null
-  const [emailJsLoaded, setEmailJsLoaded] = useState(false);
-
-  // --- REEMPLAZA ESTOS VALORES CON LOS TUYOS DE EMAILJS ---
-  // Regístrate en https://www.emailjs.com/ para obtenerlos gratis
-  const SERVICE_ID = "service_tu_id"; 
-  const TEMPLATE_ID = "template_tu_id";
-  const PUBLIC_KEY = "tu_public_key";
-
-  // Cargar EmailJS dinámicamente
-  useEffect(() => {
-    if (isOpen && !window.emailjs) {
-      const script = document.createElement('script');
-      script.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js";
-      script.async = true;
-      script.onload = () => {
-        console.log('EmailJS Loaded');
-        setEmailJsLoaded(true);
-      };
-      document.body.appendChild(script);
-    } else if (window.emailjs) {
-      setEmailJsLoaded(true);
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus(null);
-
-    if (!window.emailjs) {
-      console.error("EmailJS no está cargado aún.");
-      setStatus('error');
-      setLoading(false);
-      return;
-    }
-
-    // Envío automático usando window.emailjs (cargado desde CDN)
-    window.emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, PUBLIC_KEY)
-      .then((result) => {
-          console.log(result.text);
-          setLoading(false);
-          setStatus('success');
-          e.target.reset(); // Limpiar formulario
-          // Cerrar automáticamente después de 3 segundos
-          setTimeout(() => {
-            onClose();
-            setStatus(null);
-          }, 3000);
-      }, (error) => {
-          console.log(error.text);
-          setLoading(false);
-          setStatus('error');
-      });
-  };
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl transform transition-all scale-100">
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Mail className="text-cyan-500" /> Enviar Mensaje
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-        
-        <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Campo Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Nombre</label>
-            <input 
-              type="text" 
-              name="user_name" 
-              required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-              placeholder="Tu nombre completo"
-            />
-          </div>
-
-          {/* Campo Correo */}
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Tu Correo Electrónico</label>
-            <input 
-              type="email" 
-              name="user_email" 
-              required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-              placeholder="ejemplo@correo.com"
-            />
-          </div>
-
-          {/* Campo Mensaje */}
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">
-              Tu mensaje (Máx 1000 caracteres)
-            </label>
-            <textarea
-              name="message"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-slate-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none resize-none h-32"
-              placeholder="Hola Luis, me interesa tu perfil..."
-              maxLength={1000}
-              required
-            ></textarea>
-          </div>
-          
-          {/* Mensajes de Estado */}
-          {status === 'success' && (
-            <div className="p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm text-center font-semibold">
-              ¡Mensaje enviado correctamente!
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm text-center font-semibold">
-              Error al enviar. Verifica tu conexión o las credenciales de EmailJS.
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button 
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition-colors"
-              disabled={loading}
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit"
-              disabled={loading || !emailJsLoaded}
-              className={`bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-2 rounded-lg font-medium transition-all shadow-lg shadow-cyan-500/20 flex items-center gap-2 ${loading || !emailJsLoaded ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {loading ? (
-                <>
-                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                   Enviando...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" /> Enviar Correo
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const AIChat = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { text: "¡Hola! Soy el asistente virtual de Luis. Pregúntame sobre su experiencia en QA, desarrollo Mobile o sus proyectos de IA.", sender: 'ai' }
-  ]);
-  const [input, setInput] = useState("");
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages, isOpen]);
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMsg = { text: input, sender: 'user' };
-    setMessages(prev => [...prev, userMsg]);
-    setInput("");
-
-    setTimeout(() => {
-      let responseText = "Puedes contactarme directamente al correo: gus6bmp@gmail.com";
-      const lowerInput = input.toLowerCase();
-
-      if (lowerInput.includes("hola") || lowerInput.includes("buenos")) {
-        responseText = "¡Hola! Estoy aquí para contarte sobre el perfil de Luis.";
-      } else if (lowerInput.includes("mobile") || lowerInput.includes("flutter") || lowerInput.includes("dart")) {
-        responseText = "Luis es desarrollador Mobile con experiencia en Flutter y Dart, creando aplicaciones nativas eficientes.";
-      } else if (lowerInput.includes("qa") || lowerInput.includes("testing") || lowerInput.includes("calidad")) {
-        responseText = "Tiene sólida experiencia en QA, manejando pruebas funcionales, de regresión y automatización con Selenium y Postman.";
-      } else if (lowerInput.includes("experiencia") || lowerInput.includes("trabajo")) {
-        responseText = "Ha liderado proyectos web en ICSM y trabajado como Full Stack en Arte Ideas usando metodología SCRUM.";
-      } else if (lowerInput.includes("ia") || lowerInput.includes("mineria")) {
-        responseText = "Cuenta con una certificación especializada en IA y Machine Learning aplicada a la minería.";
-      }
-
-      setMessages(prev => [...prev, { text: responseText, sender: 'ai' }]);
-    }, 800);
-  };
-
-  return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end">
-      {!isOpen && (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="bg-cyan-600 hover:bg-cyan-500 text-white p-4 rounded-full shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-110 flex items-center gap-2"
-        >
-          <MessageSquare className="w-6 h-6" />
-          <span className="font-semibold hidden md:block">Chat con mi IA</span>
-        </button>
-      )}
-
-      {isOpen && (
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-80 sm:w-96 overflow-hidden flex flex-col h-[400px]">
-          <div className="bg-slate-900 p-3 flex justify-between items-center border-b border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-white font-semibold">Luis AI Assistant</span>
-            </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-800/50">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                  msg.sender === 'user' 
-                    ? 'bg-cyan-600 text-white rounded-tr-none' 
-                    : 'bg-slate-700 text-slate-200 rounded-tl-none'
-                }`}>
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <form onSubmit={handleSend} className="p-3 bg-slate-900 border-t border-slate-700 flex gap-2">
-            <input 
-              type="text" 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Pregúntame sobre Mobile, QA o IA..."
-              className="flex-1 bg-slate-800 text-white text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 border border-slate-700"
-            />
-            <button type="submit" className="bg-cyan-600 hover:bg-cyan-500 text-white p-2 rounded-full">
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProjectCard = ({ repo }) => (
-  <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-6 rounded-xl hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 group flex flex-col h-full">
-    <div className="flex justify-between items-start mb-4">
-      <div className="flex items-center gap-2">
-        <Terminal className="w-5 h-5 text-cyan-400" />
-        <h3 className="font-bold text-lg text-white group-hover:text-cyan-300 transition-colors break-all">{repo.name}</h3>
-      </div>
-      <div className="flex gap-2 text-slate-400">
-        <a href={repo.html_url} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-          <ExternalLink className="w-5 h-5" />
-        </a>
-      </div>
-    </div>
-    <p className="text-slate-400 text-sm mb-4 overflow-hidden line-clamp-3 flex-grow">
-      {repo.description || "Proyecto de desarrollo de software e innovación tecnológica."}
-    </p>
-    <div className="flex items-center justify-between text-xs text-slate-500 mt-auto pt-4 border-t border-slate-700/50">
-      <div className="flex items-center gap-4">
-        {repo.language && (
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-            {repo.language}
-          </span>
-        )}
-        <span className="flex items-center gap-1">
-          <Star className="w-3 h-3" /> {repo.stargazers_count}
-        </span>
-        <span className="flex items-center gap-1">
-          <GitFork className="w-3 h-3" /> {repo.forks_count}
-        </span>
-      </div>
-    </div>
-  </div>
-);
-
-// Componente actualizado para mostrar barras de nivel
-const SkillCategory = ({ title, items, icon: Icon, colorClass }) => (
-  <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-slate-600 transition-all h-full">
-    <div className={`flex items-center gap-3 mb-6 pb-3 border-b border-slate-700/50 ${colorClass}`}>
-      <Icon className="w-6 h-6" />
-      <h3 className="font-bold text-lg text-white">{title}</h3>
-    </div>
-    <div className="space-y-4">
-      {items.map((item, idx) => (
-        <div key={idx}>
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-slate-200 font-medium">{item.name}</span>
-            <span className={`${colorClass} font-mono text-xs`}>{item.level}%</span>
-          </div>
-          <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-1000 ${colorClass.replace('text-', 'bg-')}`} 
-              style={{ width: `${item.level}%` }}
-            ></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const LanguageCard = ({ lang }) => (
-  <div className="flex items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
-    <div className="flex items-center gap-3">
-      <Globe className="w-5 h-5 text-cyan-400" />
-      <span className="font-bold text-white">{lang.name}</span>
-    </div>
-    <span className="text-sm text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700">
-      {lang.level}
-    </span>
-  </div>
-);
-
 const App = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const containerRef = useRef(null);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [contactModalOpen, setContactModalOpen] = useState(false);
+
+  useGSAP(() => {
+    const tl = gsap.timeline();
+    
+    tl.to('.reveal-overlay', { height: 0, duration: 1, ease: 'expo.inOut', stagger: 0.1 })
+      .from('.hero-text', { y: 100, opacity: 0, duration: 1, ease: 'power4.out', stagger: 0.1 }, "-=0.5")
+      .from('.hero-sub', { opacity: 0, duration: 1 }, "-=0.5");
+
+    gsap.utils.toArray('.section-header').forEach(header => {
+      gsap.from(header, {
+        scrollTrigger: { trigger: header, start: 'top 90%' },
+        x: -50, opacity: 0, duration: 0.8, ease: 'expo.out'
+      });
+    });
+
+    gsap.utils.toArray('.fade-up').forEach(element => {
+      gsap.from(element, {
+        scrollTrigger: { trigger: element, start: 'top 85%' },
+        y: 30, opacity: 0, duration: 0.8, ease: 'power3.out'
+      });
+    });
+  }, { scope: containerRef });
 
   useEffect(() => {
     const fetchRepos = async () => {
       try {
-        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=6`);
-        if (!response.ok) throw new Error('Error fetching repos');
+        // Obtenemos un límite mayor de repositorios para asegurar que encontramos los elegidos
+        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
+        if (!response.ok) throw new Error('Error');
         const data = await response.json();
-        setRepos(data);
+        
+        // Filtramos la data para que coincida SÓLO con los nombres en SELECTED_REPOS
+        const filteredRepos = data.filter(repo => SELECTED_REPOS.includes(repo.name));
+        
+        // Si por alguna razón no encuentra los repos (nombres mal escritos), usamos un fallback
+        if (filteredRepos.length > 0) {
+          setRepos(filteredRepos);
+        } else {
+          throw new Error('Repos no encontrados');
+        }
+
       } catch (error) {
-        console.log("Using fallback data (API limit or user not found)");
+        // Fallback dinámico basado en tus proyectos en caso de fallo de API
         setRepos([
-          { id: 1, name: "ICSM-Web-Platform", description: "Plataforma web integral para el Instituto Científico Minero. Backend en Laravel y Frontend React.", language: "PHP", stargazers_count: 12, forks_count: 4, html_url: "#" },
-          { id: 2, name: "Flutter-Mining-App", description: "App móvil para monitoreo de datos en minería usando Flutter y Dart con integración IA.", language: "Dart", stargazers_count: 8, forks_count: 2, html_url: "#" },
-          { id: 3, name: "QA-Automation-Suite", description: "Suite de pruebas automatizadas con Selenium y Python para validación de flujos críticos.", language: "Python", stargazers_count: 15, forks_count: 5, html_url: "#" },
-          { id: 4, name: "Arte-Ideas-Ecommerce", description: "Sitio web comercial con integración de pasarela de pagos y gestión de inventario.", language: "JavaScript", stargazers_count: 10, forks_count: 3, html_url: "#" },
-          { id: 5, name: "Machine-Learning-Ores", description: "Modelo de ML para clasificación de minerales basado en imágenes.", language: "Jupyter Notebook", stargazers_count: 25, forks_count: 8, html_url: "#" },
-          { id: 6, name: "Portfolio-V2", description: "Mi portafolio personal desarrollado con React y TailwindCSS.", language: "JavaScript", stargazers_count: 5, forks_count: 1, html_url: "#" },
+          { id: 1, name: "Altera-Labs-360", description: "Laboratorio inteligente e incubadora de negocios para emprendedores.", language: "Next.js" },
+          { id: 2, name: "QA-Station-Pro", description: "Programa de escritorio robusto para workflows de QA y análisis de datos.", language: "Java" },
+          { id: 3, name: "MisRestaurantes", description: "Aplicación móvil para guardar y clasificar restaurantes usando .NET MAUI.", language: "C#" },
+          { id: 4, name: "Fogon-Gaucho", description: "Plataforma interactiva de menú digital para restaurante.", language: "Astro" },
         ]);
       } finally {
         setLoading(false);
@@ -602,296 +167,180 @@ const App = () => {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const y = element.getBoundingClientRect().top + window.scrollY - 64;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen w-full overflow-x-hidden text-slate-200 font-sans selection:bg-cyan-500/30">
-      <NavBar 
-        scrollToSection={scrollToSection} 
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+    <div ref={containerRef} className="bg-black min-h-screen w-full text-zinc-300 font-sans selection:bg-white selection:text-black">
+      
+      <div className="reveal-overlay fixed top-0 left-0 w-full h-screen bg-zinc-900 z-[60] origin-top"></div>
+      
+      <NavBar scrollToSection={scrollToSection} />
 
-      {/* Contact Modal */}
-      <ContactModal isOpen={contactModalOpen} onClose={() => setContactModalOpen(false)} />
-
-      {/* Hero Section */}
-      <section id="hero" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-600/20 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-600/20 rounded-full blur-[100px]"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-cyan-400 text-sm mb-6">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-            </span>
-            Open to Work: Mobile & QA
-          </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6">
-            Hola, soy <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">Luis Moreno</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mx-auto mb-6 font-light">
-            {YOUR_TITLE}
-          </p>
-          <p className="text-lg text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-            {CV_DATA.about}
-          </p>
-          
-          <div className="flex justify-center gap-4 flex-wrap">
-            <button 
-              onClick={() => scrollToSection('proyectos')}
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-medium transition-all shadow-lg shadow-cyan-500/25 flex items-center gap-2"
-            >
-              <Code className="w-5 h-5" /> Ver Proyectos
-            </button>
-            <button 
-              onClick={() => setContactModalOpen(true)}
-              className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-8 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
-            >
-              <Mail className="w-5 h-5" /> Contactar
-            </button>
-          </div>
-
-          <div className="mt-10 flex justify-center gap-6">
-            <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
-              <Github className="w-7 h-7" />
-            </a>
-            <a href="#" className="text-slate-400 hover:text-white transition-colors">
-              <Linkedin className="w-7 h-7" />
-            </a>
-          </div>
+      {/* HERO SECTION */}
+      <section id="hero" className="min-h-screen flex flex-col justify-center px-6 pt-20 max-w-7xl mx-auto relative">
+        <div className="absolute top-1/4 right-10 w-96 h-96 bg-zinc-900/50 blur-[100px] rounded-full pointer-events-none"></div>
+        
+        <div className="font-mono text-zinc-500 mb-6 text-sm md:text-base flex items-center gap-2 hero-sub">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          SISTEMA EN LÍNEA // DISPONIBLE PARA TRABAJO
         </div>
         
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce text-slate-500">
-          <ChevronDown className="w-6 h-6" />
+        <div className="overflow-hidden">
+          <h1 className="hero-text text-6xl md:text-8xl lg:text-[10rem] font-black text-white tracking-tighter leading-none mb-4 uppercase">
+            {YOUR_NAME.split(' ')[0]} <br /> {YOUR_NAME.split(' ')[1]}
+          </h1>
+        </div>
+        
+        <div className="overflow-hidden mb-12">
+          <h2 className="hero-text text-xl md:text-3xl text-zinc-400 font-light tracking-tight">
+            {YOUR_TITLE}
+          </h2>
+        </div>
+        
+        <p className="hero-sub max-w-2xl text-zinc-400 text-lg md:text-xl leading-relaxed mb-12 border-l-2 border-zinc-800 pl-6">
+          {CV_DATA.about}
+        </p>
+        
+        <div className="hero-sub flex gap-6 items-center">
+          <a href="#contacto" className="group flex items-center gap-3 bg-white text-black px-6 py-3 font-bold hover:bg-zinc-200 transition-all">
+            INICIAR PROYECTO <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+          <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-white transition-colors">
+            <Github className="w-6 h-6" />
+          </a>
+          <a href="#" className="text-zinc-500 hover:text-white transition-colors">
+            <Linkedin className="w-6 h-6" />
+          </a>
         </div>
       </section>
 
-      {/* Projects Section */}
-      <section id="proyectos" className="py-20 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-12">
-            <Terminal className="w-8 h-8 text-cyan-500" />
-            <h2 className="text-3xl font-bold text-white">Proyectos Destacados</h2>
-          </div>
+      {/* PROJECTS SECTION */}
+      <section id="proyectos" className="py-32 px-6 border-t border-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="section-header text-4xl md:text-5xl font-black text-white mb-16 tracking-tighter uppercase flex items-center gap-4">
+            <Code className="w-8 h-8 text-zinc-600" /> Proyectos
+          </h2>
           
-          {loading ? (
-            <div className="text-center py-20 text-slate-500">Sincronizando con GitHub...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {repos.map((repo) => (
-                <ProjectCard key={repo.id} repo={repo} />
-              ))}
-            </div>
-          )}
-          <div className="text-center mt-12">
-            <a href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors border-b border-cyan-400/30 pb-1">
-              Ver repositorio completo <ExternalLink className="w-4 h-4" />
-            </a>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {!loading && repos.map((repo, idx) => (
+              <a key={idx} href={repo.html_url || "#"} target="_blank" rel="noreferrer" className="fade-up block group relative bg-zinc-950 border border-zinc-800 p-8 hover:border-zinc-500 transition-colors duration-500">
+                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ExternalLink className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-xs font-mono text-zinc-500 mb-4">{repo.language || 'Code'}</div>
+                <h3 className="text-2xl font-bold text-white mb-4 group-hover:translate-x-2 transition-transform duration-300">{repo.name}</h3>
+                <p className="text-zinc-400 leading-relaxed">{repo.description}</p>
+                <div className="mt-8 h-[1px] w-0 bg-white group-hover:w-full transition-all duration-700 ease-out"></div>
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Experience Section */}
-      <section id="experiencia" className="py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-12">
-            <Briefcase className="w-8 h-8 text-purple-500" />
-            <h2 className="text-3xl font-bold text-white">Experiencia Laboral</h2>
-          </div>
-
-          <div className="space-y-12">
+      {/* EXPERIENCE SECTION */}
+      <section id="experiencia" className="py-32 px-6 border-t border-zinc-900 bg-zinc-950/50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="section-header text-4xl md:text-5xl font-black text-white mb-16 tracking-tighter uppercase flex items-center gap-4">
+            <Briefcase className="w-8 h-8 text-zinc-600" /> Experiencia Laboral
+          </h2>
+          
+          <div className="flex flex-col border-t border-zinc-800">
             {CV_DATA.experience.map((job, idx) => (
-              <div key={idx} className="relative pl-8 border-l-2 border-slate-800 hover:border-purple-500/50 transition-colors group">
-                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-900 border-2 border-purple-500 group-hover:bg-purple-500 transition-colors"></div>
-                <div className="mb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <h3 className="text-2xl font-bold text-white">{job.role}</h3>
-                  <span className="text-sm font-mono text-cyan-400 bg-cyan-950/30 px-3 py-1 rounded border border-cyan-900/50 w-fit mt-2 sm:mt-0">{job.period}</span>
+              <div key={idx} className="fade-up flex flex-col md:flex-row py-8 border-b border-zinc-800 group hover:bg-zinc-900/30 transition-colors px-4 -mx-4">
+                <div className="w-full md:w-1/4 mb-4 md:mb-0">
+                  <div className="font-mono text-zinc-500 text-sm mb-1">{job.period}</div>
+                  <div className="font-bold text-white uppercase tracking-wide text-sm">{job.company}</div>
                 </div>
-                <div className="text-xl text-purple-400 mb-4 font-medium flex items-center gap-2">
-                  {job.company}
+                <div className="w-full md:w-3/4">
+                  <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    {job.role}
+                  </h3>
+                  <p className="text-zinc-400 leading-relaxed max-w-3xl">
+                    {job.desc}
+                  </p>
                 </div>
-                <p className="text-slate-300 leading-relaxed text-lg">{job.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Certifications Section */}
-      <section id="certificados" className="py-20 bg-slate-900/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-12">
-            <Award className="w-8 h-8 text-yellow-500" />
-            <h2 className="text-3xl font-bold text-white">Certificaciones</h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            {/* Columna 1: Cursos y Estudios */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-cyan-400" /> Cursos y Especializaciones
-                </h3>
-                <a 
-                  href={DRIVE_CURSOS} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-xs flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 px-3 py-1.5 rounded border border-slate-700 transition-colors"
-                >
-                  <FolderOpen className="w-3 h-3" /> Ver Carpeta
-                </a>
+      {/* EDUCATION SECTION */}
+      <section id="educacion" className="py-20 px-6 border-t border-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="section-header text-3xl md:text-4xl font-black text-white mb-12 tracking-tighter uppercase flex items-center gap-4">
+            <BookOpen className="w-8 h-8 text-zinc-600" /> Educación
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {CV_DATA.education.map((edu, idx) => (
+              <div key={idx} className="fade-up border border-zinc-800 p-6 bg-zinc-950/30">
+                <div className="font-mono text-zinc-500 text-xs mb-2">{edu.period}</div>
+                <h3 className="text-xl font-bold text-white mb-2">{edu.degree}</h3>
+                <p className="text-zinc-400">{edu.institution}</p>
               </div>
-              
-              <div className="space-y-4">
-                {CV_DATA.certifications.courses.map((cert, idx) => (
-                  <div key={idx} className={`bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border ${cert.status === 'in_process' ? 'border-dashed border-yellow-500/50 bg-yellow-500/5' : 'border-slate-700'} hover:shadow-lg transition-all`}>
-                    <div className="flex justify-between items-start mb-3">
-                      {cert.status === 'in_process' ? (
-                        <span className="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-1 rounded font-bold flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> EN PROCESO
-                        </span>
-                      ) : (
-                        <span className="text-slate-500 text-sm font-mono">{cert.year}</span>
-                      )}
-                      <Award className={`w-5 h-5 ${cert.status === 'in_process' ? 'text-yellow-500' : 'text-slate-600'}`} />
-                    </div>
-                    <h4 className="font-bold text-white text-lg mb-1">{cert.title}</h4>
-                    <div className="text-cyan-500 text-sm mb-2">{cert.issuer}</div>
-                    <p className="text-slate-400 text-sm text-justify">{cert.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Columna 2: Certificados de Trabajo */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-purple-400" /> Certificados Laborales
-                </h3>
-                <a 
-                  href={DRIVE_TRABAJOS} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-xs flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-purple-400 px-3 py-1.5 rounded border border-slate-700 transition-colors"
-                >
-                  <FolderOpen className="w-3 h-3" /> Ver Carpeta
-                </a>
-              </div>
-
-              <div className="space-y-4">
-                 {CV_DATA.certifications.jobs.map((cert, idx) => (
-                  <div key={idx} className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-xl border border-slate-700 hover:border-purple-500/30 hover:shadow-lg transition-all">
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="text-slate-500 text-sm font-mono">{cert.year}</span>
-                      <FileText className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <h4 className="font-bold text-white text-lg mb-1">{cert.title}</h4>
-                    <div className="text-purple-400 text-sm mb-2">{cert.issuer}</div>
-                    <p className="text-slate-400 text-sm text-justify">{cert.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Skills Section (NUEVO DISEÑO EN COLUMNAS) */}
-      <section id="habilidades" className="py-20 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 mb-12">
-            <Cpu className="w-8 h-8 text-green-500" />
-            <h2 className="text-3xl font-bold text-white">Habilidades Técnicas</h2>
-          </div>
-
-          {/* Idiomas (Destacado) */}
-          <div className="mb-12">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-blue-400" /> Idiomas
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-              {CV_DATA.detailedSkills.languages.map((lang, idx) => (
-                <LanguageCard key={idx} lang={lang} />
-              ))}
-            </div>
-          </div>
-
-          {/* Grid de Categorías Técnicas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SkillCategory 
-              title="Lenguajes de Programación" 
-              items={CV_DATA.detailedSkills.programming} 
-              icon={Code} 
-              colorClass="text-cyan-400"
-            />
-            <SkillCategory 
-              title="Frameworks & Librerías" 
-              items={CV_DATA.detailedSkills.frameworks} 
-              icon={Layout} 
-              colorClass="text-purple-400"
-            />
-            <SkillCategory 
-              title="QA, Testing & Automatización" 
-              items={CV_DATA.detailedSkills.qa} 
-              icon={ShieldCheck} 
-              colorClass="text-green-400"
-            />
-             <SkillCategory 
-              title="Herramientas & Plataformas" 
-              items={CV_DATA.detailedSkills.tools} 
-              icon={Settings} 
-              colorClass="text-yellow-400"
-            />
+      {/* SKILLS SECTION */}
+      <section id="skills" className="py-32 px-6 border-t border-zinc-900">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="section-header text-4xl md:text-5xl font-black text-white mb-16 tracking-tighter uppercase flex items-center gap-4">
+            <Cpu className="w-8 h-8 text-zinc-600" /> Tecnologías
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {CV_DATA.skills.map((skillGroup, idx) => (
+              <div key={idx} className="fade-up">
+                <h3 className="font-mono text-zinc-500 text-sm uppercase tracking-widest mb-6 border-b border-zinc-800 pb-2">
+                  // {skillGroup.category}
+                </h3>
+                <ul className="flex flex-col gap-3">
+                  {skillGroup.items.map((item, i) => (
+                    <li key={i} className="text-lg text-zinc-300 font-medium hover:text-white transition-colors flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-zinc-700 inline-block"></span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contacto" className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 to-slate-900 opacity-50"></div>
-        <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800 text-cyan-400 mb-8 shadow-xl shadow-cyan-500/20">
-            <Mail className="w-10 h-10" />
-          </div>
-          <h2 className="text-4xl font-bold text-white mb-6">¿Listo para colaborar?</h2>
-          <p className="text-slate-400 mb-10 text-lg">
-            Actualmente estoy buscando nuevas oportunidades en Desarrollo Software y QA. Si tienes un proyecto o vacante, hablemos.
+      {/* CONTACT SECTION */}
+      <section id="contacto" className="py-32 px-6 border-t border-zinc-900 bg-black text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_center,_white_1px,_transparent_1px)]" style={{ backgroundSize: '24px 24px' }}></div>
+        
+        <div className="max-w-3xl mx-auto relative z-10 fade-up">
+          <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase">
+            Iniciemos un proceso.
+          </h2>
+          <p className="text-xl text-zinc-400 mb-12 font-light">
+            Arquitectura escalable. Código limpio. Calidad asegurada.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-             <button 
-              onClick={() => setContactModalOpen(true)}
-              className="inline-flex items-center justify-center bg-white text-slate-900 hover:bg-cyan-50 px-8 py-4 rounded-lg font-bold text-lg transition-all transform hover:-translate-y-1 shadow-lg cursor-pointer"
-            >
-              <Mail className="w-5 h-5 mr-2" /> Enviar Correo
-            </button>
-            <a 
-              href={`https://wa.me/51912439638`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center bg-green-600 text-white hover:bg-green-500 px-8 py-4 rounded-lg font-bold text-lg transition-all transform hover:-translate-y-1 shadow-lg"
-            >
-              WhatsApp
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
+            <a href={`mailto:${YOUR_EMAIL}`} className="group bg-white text-black px-8 py-4 font-bold text-lg flex items-center justify-center gap-3 hover:bg-zinc-200 transition-colors">
+              <Mail className="w-5 h-5" /> ENVIAR EMAIL
+            </a>
+            <a href={`https://wa.me/${YOUR_PHONE.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="group bg-transparent border border-zinc-700 text-white px-8 py-4 font-bold text-lg flex items-center justify-center gap-3 hover:border-white transition-colors">
+              <Terminal className="w-5 h-5" /> WHATSAPP
             </a>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-950 border-t border-slate-900 py-8 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} {YOUR_NAME}. Ingeniero de Software con IA.</p>
+      {/* FOOTER */}
+      <footer className="py-8 text-center text-zinc-600 font-mono text-sm border-t border-zinc-900">
+        <p>SYSTEM.OUT.PRINTLN("© {new Date().getFullYear()} {YOUR_NAME}. ALL RIGHTS RESERVED.");</p>
       </footer>
-
-      {/* AI Floating Chat */}
-      <AIChat />
     </div>
   );
 };
