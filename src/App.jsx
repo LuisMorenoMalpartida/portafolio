@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -76,12 +76,16 @@ const CV_DATA = {
 
 // --- COMPONENTES UI AVANZADOS ---
 
-// 1. Cursor Personalizado GSAP
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const followerRef = useRef(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
+    
+    if (!cursorRef.current || !followerRef.current) return;
+
     let ctx = gsap.context(() => {
       const xTo = gsap.quickTo(cursorRef.current, "x", { duration: 0.1, ease: "power3" });
       const yTo = gsap.quickTo(cursorRef.current, "y", { duration: 0.1, ease: "power3" });
@@ -89,26 +93,50 @@ const CustomCursor = () => {
       const fXTo = gsap.quickTo(followerRef.current, "x", { duration: 0.5, ease: "power3" });
       const fYTo = gsap.quickTo(followerRef.current, "y", { duration: 0.5, ease: "power3" });
 
-      window.addEventListener("mousemove", (e) => {
+      const handleMouseMove = (e) => {
+        if (!isMounted.current) return;
         xTo(e.clientX);
         yTo(e.clientY);
         fXTo(e.clientX);
         fYTo(e.clientY);
-      });
+      };
+
+      window.addEventListener("mousemove", handleMouseMove);
 
       const clickables = document.querySelectorAll('a, button, .magnetic');
+      const cleanupFunctions = [];
+
       clickables.forEach((el) => {
-        el.addEventListener('mouseenter', () => {
+        const handleMouseEnter = () => {
+          if (!isMounted.current) return;
           gsap.to(followerRef.current, { scale: 1.5, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0)', duration: 0.3 });
           gsap.to(cursorRef.current, { scale: 0, duration: 0.3 });
-        });
-        el.addEventListener('mouseleave', () => {
+        };
+        const handleMouseLeave = () => {
+          if (!isMounted.current) return;
           gsap.to(followerRef.current, { scale: 1, backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.3)', duration: 0.3 });
           gsap.to(cursorRef.current, { scale: 1, duration: 0.3 });
+        };
+        
+        el.addEventListener('mouseenter', handleMouseEnter);
+        el.addEventListener('mouseleave', handleMouseLeave);
+        
+        cleanupFunctions.push(() => {
+          el.removeEventListener('mouseenter', handleMouseEnter);
+          el.removeEventListener('mouseleave', handleMouseLeave);
         });
       });
+
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        cleanupFunctions.forEach(cleanup => cleanup());
+      };
     });
-    return () => ctx.revert();
+
+    return () => {
+      isMounted.current = false;
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -119,21 +147,34 @@ const CustomCursor = () => {
   );
 };
 
-// 2. Preloader Estilo Consola
 const Preloader = () => {
   const [progress, setProgress] = useState(0);
-  const containerRef = useRef();
+  const containerRef = useRef(null);
+  const isMounted = useRef(true);
 
   useGSAP(() => {
+    if (!containerRef.current) return;
+    
     let tl = gsap.timeline();
-    tl.to({}, {
+    const progressObj = { value: 0 };
+    
+    tl.to(progressObj, {
+      value: 100,
       duration: 2,
+      ease: "power1.inOut",
       onUpdate: function() {
-        setProgress(Math.floor(this.progress() * 100));
+        if (isMounted.current) {
+          setProgress(Math.floor(progressObj.value));
+        }
       }
     })
     .to('.loader-text', { opacity: 0, y: -20, duration: 0.5, ease: "power2.in" })
     .to(containerRef.current, { yPercent: -100, duration: 1, ease: "expo.inOut", delay: 0.2 });
+
+    return () => {
+      isMounted.current = false;
+      tl.kill();
+    };
   }, { scope: containerRef });
 
   return (
@@ -149,7 +190,6 @@ const Preloader = () => {
   );
 };
 
-// 3. Header Flotante Glass
 const NavBar = ({ scrollToSection }) => (
   <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 perspective-[1000px]">
     <div className="bg-zinc-950/70 backdrop-blur-xl border border-zinc-800/80 rounded-2xl px-6 py-4 flex items-center justify-between shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)]">
@@ -174,35 +214,94 @@ const NavBar = ({ scrollToSection }) => (
         ))}
       </div>
 
-      <button onClick={() => document.getElementById('contacto').scrollIntoView({behavior:'smooth'})} className="magnetic bg-white hover:bg-cyan-400 hover:text-black text-black px-6 py-2 text-xs font-bold font-mono tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+      <button onClick={() => document.getElementById('contacto')?.scrollIntoView({behavior:'smooth'})} className="magnetic bg-white hover:bg-cyan-400 hover:text-black text-black px-6 py-2 text-xs font-bold font-mono tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">
         CONTACTAR
       </button>
     </div>
   </nav>
 );
 
-// --- COMPONENTE NUEVO: THREE.JS AVANZADO ---
+// --- COMPONENTE THREE.JS TOTALMENTE OPTIMIZADO ---
 const ThreeBackground = () => {
   const mountRef = useRef(null);
+  const animationRef = useRef(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
+    
+    // Verificar que el elemento exista
+    if (!mountRef.current) return;
+
+    // 1. Configuración de Escena
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050505, 0.03);
+    scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 25;
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 32;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ 
+      alpha: true, 
+      antialias: true, 
+      powerPreference: "high-performance" 
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Limpiar cualquier renderer previo
+    if (mountRef.current.firstChild) {
+      mountRef.current.removeChild(mountRef.current.firstChild);
+    }
     mountRef.current.appendChild(renderer.domElement);
 
-    const geometry = new THREE.IcosahedronGeometry(12, 32);
+    // Contenedor general para animaciones conjuntas
+    const masterGroup = new THREE.Group();
+    scene.add(masterGroup);
+
+    // 2. CAMPO DE DATOS (Background Particles)
+    const bgParticlesGeo = new THREE.BufferGeometry();
+    const bgParticlesCount = 3500;
+    const bgPos = new Float32Array(bgParticlesCount * 3);
+    const bgColors = new Float32Array(bgParticlesCount * 3);
     
-    const material = new THREE.ShaderMaterial({
+    const colorCyan = new THREE.Color('#06b6d4');
+    const colorPurple = new THREE.Color('#6366f1');
+
+    for(let i = 0; i < bgParticlesCount * 3; i+=3) {
+      bgPos[i] = (Math.random() - 0.5) * 200; 
+      bgPos[i+1] = (Math.random() - 0.5) * 300; 
+      bgPos[i+2] = (Math.random() - 0.5) * 150 - 20;
+
+      const mix = Math.random();
+      const color = colorCyan.clone().lerp(colorPurple, mix);
+      bgColors[i] = color.r;
+      bgColors[i+1] = color.g;
+      bgColors[i+2] = color.b;
+    }
+    
+    bgParticlesGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+    bgParticlesGeo.setAttribute('color', new THREE.BufferAttribute(bgColors, 3));
+
+    const bgParticlesMat = new THREE.PointsMaterial({
+      size: 0.12,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const bgParticlesMesh = new THREE.Points(bgParticlesGeo, bgParticlesMat);
+    masterGroup.add(bgParticlesMesh);
+
+    // 3. CORE DE INTELIGENCIA ARTIFICIAL
+    const coreGeo = new THREE.IcosahedronGeometry(11, 64);
+    
+    const coreMat = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uColor: { value: new THREE.Color('#06b6d4') },
+        uColor1: { value: new THREE.Color('#06b6d4') },
+        uColor2: { value: new THREE.Color('#a855f7') },
         uMouse: { value: new THREE.Vector2(0, 0) }
       },
       vertexShader: `
@@ -227,10 +326,7 @@ const ThreeBackground = () => {
           vec3 x2 = x0 - i2 + C.yyy;
           vec3 x3 = x0 - D.yyy;
           i = mod289(i);
-          vec4 p = permute( permute( permute(
-                     i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-                   + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-                   + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+          vec4 p = permute( permute( permute( i.z + vec4(0.0, i1.z, i2.z, 1.0 )) + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
           float n_ = 0.142857142857;
           vec3 ns = n_ * D.wyz - D.xzx;
           vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
@@ -260,36 +356,37 @@ const ThreeBackground = () => {
         void main() {
           vec3 pos = position;
           
-          float noiseFreq = 0.3;
-          float noiseAmp = 2.5;
-          vec3 noisePos = vec3(pos.x * noiseFreq + uTime * 0.5, pos.y * noiseFreq + uTime * 0.3, pos.z * noiseFreq);
+          float noiseFreq = 0.25;
+          float noiseAmp = 3.0;
+          vec3 noisePos = vec3(pos.x * noiseFreq + uTime * 0.4, pos.y * noiseFreq + uTime * 0.4, pos.z * noiseFreq);
           float dist = snoise(noisePos) * noiseAmp;
           
           pos += normal * dist;
           
-          pos.x += uMouse.x * 3.0;
-          pos.y += uMouse.y * 3.0;
+          pos.x += uMouse.x * 2.5;
+          pos.y += uMouse.y * 2.5;
 
           vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
           gl_Position = projectionMatrix * mvPosition;
           
-          gl_PointSize = (15.0 / -mvPosition.z);
+          gl_PointSize = (20.0 / -mvPosition.z);
           vElevation = dist;
         }
       `,
       fragmentShader: `
-        uniform vec3 uColor;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
         varying float vElevation;
 
         void main() {
           float dist = distance(gl_PointCoord, vec2(0.5));
           if(dist > 0.5) discard;
           
-          float mixStrength = (vElevation + 2.5) / 5.0;
-          vec3 finalColor = mix(vec3(0.5, 0.5, 0.5), uColor, mixStrength);
+          float mixStrength = (vElevation + 3.0) / 6.0;
+          vec3 finalColor = mix(uColor2, uColor1, mixStrength);
           
           float alpha = 1.0 - (dist * 2.0);
-          gl_FragColor = vec4(finalColor, alpha * 0.8);
+          gl_FragColor = vec4(finalColor, alpha * 0.9);
         }
       `,
       transparent: true,
@@ -297,20 +394,50 @@ const ThreeBackground = () => {
       depthWrite: false
     });
 
-    const particles = new THREE.Points(geometry, material);
-    particles.position.x = 8;
-    scene.add(particles);
+    const coreMesh = new THREE.Points(coreGeo, coreMat);
+    coreMesh.position.set(12, 0, -5);
+    masterGroup.add(coreMesh);
 
+    // 4. ANILLOS TECNOLÓGICOS
+    const ringMat = new THREE.PointsMaterial({
+        color: 0x06b6d4,
+        size: 0.05,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending
+    });
+    
+    const ringGeo1 = new THREE.TorusGeometry(16, 0.02, 16, 150);
+    const ringGeo2 = new THREE.TorusGeometry(21, 0.02, 16, 200);
+    const ringGeo3 = new THREE.TorusGeometry(26, 0.02, 16, 250);
+    
+    const ring1 = new THREE.Points(ringGeo1, ringMat);
+    const ring2 = new THREE.Points(ringGeo2, ringMat);
+    const ring3 = new THREE.Points(ringGeo3, ringMat);
+
+    ring1.position.copy(coreMesh.position);
+    ring2.position.copy(coreMesh.position);
+    ring3.position.copy(coreMesh.position);
+
+    ring1.rotation.x = Math.PI / 2;
+    ring2.rotation.y = Math.PI / 3;
+    ring3.rotation.x = Math.PI / 4;
+
+    masterGroup.add(ring1, ring2, ring3);
+
+    // --- INTERACCIONES Y ANIMACIÓN ---
     let mouse = { x: 0, y: 0 };
     let targetMouse = { x: 0, y: 0 };
     
     const onMouseMove = (event) => {
+      if (!isMounted.current) return;
       targetMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       targetMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     };
     window.addEventListener('mousemove', onMouseMove);
 
     const onResize = () => {
+      if (!isMounted.current) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -319,33 +446,84 @@ const ThreeBackground = () => {
 
     const clock = new THREE.Clock();
     
-    const tick = () => {
-      const elapsedTime = clock.getElapsedTime();
+    const animate = () => {
+      if (!isMounted.current) {
+        return;
+      }
       
-      material.uniforms.uTime.value = elapsedTime;
+      const elapsedTime = clock.getElapsedTime();
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      
+      coreMat.uniforms.uTime.value = elapsedTime;
       
       mouse.x += (targetMouse.x - mouse.x) * 0.05;
       mouse.y += (targetMouse.y - mouse.y) * 0.05;
-      material.uniforms.uMouse.value.set(mouse.x, mouse.y);
+      coreMat.uniforms.uMouse.value.set(mouse.x, mouse.y);
 
-      particles.rotation.y = elapsedTime * 0.1;
-      particles.rotation.x = elapsedTime * 0.05;
+      coreMesh.rotation.y = elapsedTime * 0.1;
+      coreMesh.rotation.x = elapsedTime * 0.05;
 
-      camera.position.y = -(window.scrollY * 0.015);
+      ring1.rotation.x = (Math.PI / 2) + elapsedTime * 0.2;
+      ring1.rotation.y = elapsedTime * 0.1;
+      
+      ring2.rotation.y = (Math.PI / 3) - elapsedTime * 0.15;
+      ring2.rotation.z = elapsedTime * 0.1;
+
+      ring3.rotation.x = (Math.PI / 4) + elapsedTime * 0.05;
+      ring3.rotation.z = -elapsedTime * 0.08;
+
+      bgParticlesMesh.rotation.y = elapsedTime * 0.03;
+
+      masterGroup.position.x += (mouse.x * 2 - masterGroup.position.x) * 0.05;
+      masterGroup.position.y += (mouse.y * 2 - masterGroup.position.y) * 0.05;
+
+      camera.position.y = -(scrollY * 0.012);
+      masterGroup.rotation.y = scrollY * 0.001;
 
       renderer.render(scene, camera);
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    gsap.ticker.add(tick);
+    animate();
 
+    // Cleanup completo
     return () => {
+      isMounted.current = false;
+      
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
-      gsap.ticker.remove(tick);
-      mountRef.current?.removeChild(renderer.domElement);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
+      
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      
+      // Limpiar el DOM
+      if (mountRef.current && renderer.domElement) {
+        try {
+          mountRef.current.removeChild(renderer.domElement);
+        } catch (e) {
+          // Ignorar error si el elemento ya no existe
+        }
+      }
+      
+      // Limpiar memoria de Three.js
+      try {
+        bgParticlesGeo.dispose();
+        bgParticlesMat.dispose();
+        coreGeo.dispose();
+        coreMat.dispose();
+        ringGeo1.dispose();
+        ringGeo2.dispose();
+        ringGeo3.dispose();
+        ringMat.dispose();
+        renderer.dispose();
+        
+        // Limpiar el canvas
+        renderer.domElement.remove();
+      } catch (e) {
+        // Ignorar errores de disposed
+      }
     };
   }, []);
 
@@ -358,22 +536,34 @@ const App = () => {
   const backgroundGlowRef = useRef(null);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const lenisRef = useRef(null);
+  const isMounted = useRef(true);
 
   // Inicializar Lenis
   useEffect(() => {
+    isMounted.current = true;
     document.body.style.cursor = 'none';
+    
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smooth: true,
     });
+    lenisRef.current = lenis;
     
     lenis.on('scroll', ScrollTrigger.update);
     
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    const raf = (time) => {
+      if (isMounted.current) {
+        lenis.raf(time * 1000);
+      }
+    };
+    gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
     
     return () => {
+      isMounted.current = false;
+      gsap.ticker.remove(raf);
       lenis.destroy();
       document.body.style.cursor = 'auto';
     };
@@ -388,40 +578,57 @@ const App = () => {
         const data = await response.json();
         const filteredRepos = data.filter(repo => SELECTED_REPOS.includes(repo.name));
         
-        if (filteredRepos.length > 0) setRepos(filteredRepos);
-        else throw new Error('Repos no encontrados');
+        if (filteredRepos.length > 0 && isMounted.current) {
+          setRepos(filteredRepos);
+        } else {
+          throw new Error('Repos no encontrados');
+        }
       } catch (error) {
-        setRepos([
-          { id: 1, name: "FineBank", description: "Plataforma financiera y gestión bancaria.", language: "TypeScript", html_url: "https://github.com/LuisMorenoMalpartida/FineBank" },
-          { id: 2, name: "VALERIA-STELLA", description: "Proyecto web desarrollado a medida.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/VALERIA-STELLA" },
-          { id: 3, name: "attendance-system", description: "Sistema automatizado para el control de asistencia.", language: "Python", html_url: "https://github.com/LuisMorenoMalpartida/attendance-system" },
-          { id: 4, name: "Entrevista_Altera-", description: "Proyecto y prueba técnica para Altera.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/Entrevista_Altera-" }
-        ]);
+        console.error('Error fetching repos:', error);
+        if (isMounted.current) {
+          setRepos([
+            { id: 1, name: "FineBank", description: "Plataforma financiera y gestión bancaria.", language: "TypeScript", html_url: "https://github.com/LuisMorenoMalpartida/FineBank" },
+            { id: 2, name: "VALERIA-STELLA", description: "Proyecto web desarrollado a medida.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/VALERIA-STELLA" },
+            { id: 3, name: "attendance-system", description: "Sistema automatizado para el control de asistencia.", language: "Python", html_url: "https://github.com/LuisMorenoMalpartida/attendance-system" },
+            { id: 4, name: "Entrevista_Altera-", description: "Proyecto y prueba técnica para Altera.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/Entrevista_Altera-" }
+          ]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
     fetchRepos();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
-  // Refrescar ScrollTrigger cuando los repos terminan de cargar y renderizar
+  // Refrescar ScrollTrigger cuando los repos terminan de cargar
   useEffect(() => {
     if (!loading) {
-      const timer = setTimeout(() => ScrollTrigger.refresh(), 100);
+      const timer = setTimeout(() => {
+        if (isMounted.current) {
+          ScrollTrigger.refresh();
+        }
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [loading]);
 
-  // GSAP Animaciones Generales (NO dependen de repos)
+  // GSAP Animaciones Generales
   useGSAP(() => {
-    // Efecto Glow de Fondo 2D - CON CLEANUP
     const handleMouseMove = (e) => {
-      gsap.to(backgroundGlowRef.current, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 2,
-        ease: "power2.out",
-      });
+      if (backgroundGlowRef.current && isMounted.current) {
+        gsap.to(backgroundGlowRef.current, {
+          x: e.clientX,
+          y: e.clientY,
+          duration: 2,
+          ease: "power2.out",
+        });
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
 
@@ -441,16 +648,18 @@ const App = () => {
     };
   }, { scope: containerRef });
 
-  // Scroll Horizontal - Se re-ejecuta cuando repos/loading cambian
-  useGSAP(() => {
-    if (loading || repos.length === 0) return;
+  // Scroll Horizontal
+  useEffect(() => {
+    if (loading || repos.length === 0 || !isMounted.current) return;
 
     const slider = document.querySelector(".horizontal-slider");
     const wrapper = document.querySelector(".horizontal-wrapper");
     
     if (!slider || !wrapper) return;
 
-    gsap.to(slider, {
+    let scrollTriggerInstance = null;
+    
+    const tl = gsap.to(slider, {
       x: () => -(slider.scrollWidth - window.innerWidth),
       ease: "none",
       scrollTrigger: {
@@ -463,11 +672,17 @@ const App = () => {
       }
     });
 
-    ScrollTrigger.refresh();
-  }, { 
-    scope: containerRef, 
-    dependencies: [repos, loading] 
-  });
+    if (tl.scrollTrigger) {
+      scrollTriggerInstance = tl.scrollTrigger;
+    }
+
+    return () => {
+      if (scrollTriggerInstance) {
+        scrollTriggerInstance.kill();
+      }
+      tl.kill();
+    };
+  }, [repos, loading]);
 
   return (
     <div ref={containerRef} className="bg-[#050505] min-h-screen w-full text-zinc-300 font-sans selection:bg-cyan-500 selection:text-black overflow-hidden relative">
@@ -478,15 +693,15 @@ const App = () => {
       <ThreeBackground />
       <div className="fixed inset-0 z-[1] pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
       
-      {/* Orbe Magnético 2D */}
+      {/* Orbe Magnético 2D Trasero */}
       <div 
         ref={backgroundGlowRef} 
-        className="fixed top-0 left-0 w-[400px] h-[400px] bg-cyan-900/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[1]"
+        className="fixed top-0 left-0 w-[400px] h-[400px] bg-cyan-900/15 rounded-full blur-[140px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[1]"
       ></div>
 
       <NavBar scrollToSection={(id) => {
         const element = document.getElementById(id);
-        if (element) window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
       }} />
 
       {/* HERO SECTION */}
@@ -505,7 +720,7 @@ const App = () => {
           <h1 className="text-6xl md:text-8xl lg:text-[11rem] font-black tracking-tighter leading-[0.8] uppercase overflow-hidden py-2">
             <div className="hero-mask overflow-hidden">
               <span className="inline-block bg-gradient-to-r from-zinc-100 via-cyan-400 to-cyan-600 bg-clip-text text-transparent">
-                {YOUR_NAME.split(' ')[1]}
+                {YOUR_NAME.split(' ')[1] || YOUR_NAME}
               </span>
             </div>
           </h1>
@@ -532,10 +747,10 @@ const App = () => {
         </div>
       </section>
 
-      {/* HORIZONTAL SCROLL PROJECTS SECTION - CORREGIDO */}
-      <section id="proyectos" className="horizontal-wrapper relative w-full h-screen flex items-center overflow-hidden border-y border-zinc-900 z-10 bg-black/40 backdrop-blur-sm">
+      {/* HORIZONTAL SCROLL PROJECTS SECTION */}
+      <section id="proyectos" className="horizontal-wrapper relative w-full h-screen flex items-center overflow-hidden border-y border-zinc-900/50 z-10 bg-gradient-to-b from-transparent via-black/40 to-transparent backdrop-blur-[2px]">
         
-        <div className="absolute top-20 md:top-24 left-6 md:left-24 z-20 mix-blend-difference text-white">
+        <div className="absolute top-20 md:top-24 left-6 md:left-24 z-20 mix-blend-difference text-white pointer-events-none">
           <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Proyectos.</h2>
           <p className="font-mono text-cyan-500 mt-2">// ARCHIVOS_SISTEMA</p>
         </div>
@@ -566,8 +781,8 @@ const App = () => {
           ))}
            <div className="horizontal-slide flex-shrink-0 w-[85vw] md:w-[400px] h-[80%] flex flex-col items-center justify-center text-center p-10 bg-zinc-950/80 backdrop-blur-xl border border-zinc-900 rounded-3xl">
               <Lock className="w-10 h-10 text-cyan-900 mb-6" />
-              <h3 className="text-2xl font-bold text-white mb-4">CRMs Privados</h3>
-              <p className="text-zinc-500">He desarrollado plataformas CRM corporativas que permanecen en repositorios privados por confidencialidad.</p>
+              <h3 className="text-2xl font-bold text-white mb-4">CRMs y Privados</h3>
+              <p className="text-zinc-500">Desarrollo de plataformas internas y arquitecturas complejas bajo acuerdos de confidencialidad.</p>
            </div>
         </div>
       </section>
@@ -597,14 +812,14 @@ const App = () => {
       </section>
 
       {/* SKILLS GRID */}
-      <section id="skills" className="py-32 px-6 max-w-7xl mx-auto relative z-10 border-t border-zinc-900 bg-black/20 backdrop-blur-sm">
+      <section id="skills" className="py-32 px-6 max-w-7xl mx-auto relative z-10 border-t border-zinc-900/50 bg-black/40 backdrop-blur-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="reveal col-span-1 md:col-span-2 lg:col-span-4 mb-10">
              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">Stack Técnico.</h2>
           </div>
           
           {CV_DATA.skills.map((skillGroup, idx) => (
-            <div key={idx} className="reveal magnetic bg-zinc-900/40 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 hover:border-cyan-500/50 hover:bg-zinc-900/80 transition-colors duration-300">
+            <div key={idx} className="reveal magnetic bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 hover:border-cyan-500/50 hover:bg-zinc-900/90 transition-colors duration-300">
               <Cpu className="w-8 h-8 text-cyan-500 mb-6" />
               <h3 className="font-mono text-zinc-100 text-sm uppercase tracking-widest mb-6 border-b border-zinc-800 pb-4">
                 {skillGroup.category}
@@ -622,7 +837,7 @@ const App = () => {
           {/* Education Box */}
           <div className="reveal col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {CV_DATA.education.map((edu, idx) => (
-              <div key={idx} className="bg-zinc-950/60 backdrop-blur-md border border-zinc-900 p-8 rounded-3xl flex justify-between items-end group hover:border-cyan-900 transition-colors">
+              <div key={idx} className="bg-zinc-950/80 backdrop-blur-md border border-zinc-900 p-8 rounded-3xl flex justify-between items-end group hover:border-cyan-900 transition-colors">
                  <div>
                    <BookOpen className="w-6 h-6 text-zinc-600 group-hover:text-cyan-500 transition-colors mb-4" />
                    <h3 className="text-lg font-bold text-white">{edu.degree}</h3>
@@ -643,7 +858,7 @@ const App = () => {
           </h2>
           
           <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <a href={`mailto:${YOUR_EMAIL}`} className="magnetic bg-white text-black px-10 py-6 font-bold text-sm tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:scale-105 hover:bg-cyan-500 hover:text-black transition-all">
+            <a href={`mailto:${YOUR_EMAIL}`} className="magnetic bg-white text-black px-10 py-6 font-bold text-sm tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:scale-105 hover:bg-cyan-500 hover:text-black transition-all shadow-[0_0_25px_rgba(255,255,255,0.1)]">
               <Mail className="w-5 h-5" /> Enviar Email
             </a>
             <a href={`https://wa.me/${YOUR_PHONE.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="magnetic bg-transparent border border-zinc-700 text-white px-10 py-6 font-bold text-sm tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:border-cyan-500 hover:text-cyan-400 hover:scale-105 transition-all bg-black/50">
