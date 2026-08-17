@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -30,7 +30,7 @@ const CV_DATA = {
   about: "Ingeniero de Software con especialización en IA y experiencia en desarrollo Full Stack bajo metodología SCRUM. Perfil proactivo y orientado a resultados, enfocado en la entrega de productos de alta calidad mediante la aplicación de metodologías de Testing y Aseguramiento de Calidad (QA), incluyendo pruebas funcionales, de regresión y herramientas automatizadas para garantizar la robustez del sistema.",
   skills: [
     { category: "Lenguajes", items: ["Python", "Java", "JavaScript", "TypeScript", "PHP", "HTML/CSS"] }, 
-    { category: "Frameworks", items: ["React", "Next.js", "Laravel", "Tailwind", "FastAPI", "Node.js", "GSAP", "Three.js", "Flutter"] }, 
+    { category: "Frameworks", items: ["React", "Next.js", "Laravel", "Angular", "Tailwind", "FastAPI", "Node.js", "GSAP", "Three.js", "Flutter"] }, 
     { category: "Bases / Cloud", items: ["MySQL", "MongoDB", "PostgreSQL", "Supabase", "Neon", "AWS", "Azure"] }, 
     { category: "QA / DevOps", items: ["Selenium", "Postman", "JMeter", "PHPUnit", "Docker", "Vercel", "Scrum"] } 
   ],
@@ -502,6 +502,7 @@ const ThreeBackground = () => {
       if (mountRef.current && renderer.domElement) {
         try {
           mountRef.current.removeChild(renderer.domElement);
+        // eslint-disable-next-line no-unused-vars
         } catch (e) {
           // Ignorar error si el elemento ya no existe
         }
@@ -521,6 +522,7 @@ const ThreeBackground = () => {
         
         // Limpiar el canvas
         renderer.domElement.remove();
+      // eslint-disable-next-line no-unused-vars
       } catch (e) {
         // Ignorar errores de disposed
       }
