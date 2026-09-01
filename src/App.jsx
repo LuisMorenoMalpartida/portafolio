@@ -6,7 +6,8 @@ import Lenis from '@studio-freight/lenis';
 import * as THREE from 'three';
 import { 
   Github, Linkedin, Mail, Terminal, Code, Cpu, 
-  ExternalLink, Briefcase, ArrowRight, BookOpen, Lock
+  ExternalLink, Briefcase, ArrowRight, BookOpen, Lock,
+  X, AlertCircle
 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -18,11 +19,46 @@ const YOUR_TITLE = "INGENIERO DE SOFTWARE CON I.A";
 const YOUR_EMAIL = "gus6bmp@gmail.com"; 
 const YOUR_PHONE = "+51 912439638"; 
 
-const SELECTED_REPOS = [
-  "FineBank",
-  "VALERIA-STELLA",
-  "attendance-system",
-  "Entrevista_Altera-"
+// --- PROYECTOS CON IMÁGENES Y URLs ---
+const PROJECTS = [
+  {
+    id: 1,
+    name: "Egoa Capital",
+    description: "CRM inmobiliario para gestión de clientes, pipeline de ventas y dashboard en tiempo real.",
+    language: "Next.js",
+    image: "/images/projects/egoa-capital.png",
+    url: null, // Sin URL pública
+    isPrivate: true,
+    privateMessage: "Este proyecto es un CRM privado desarrollado para Egoa Capital. Por políticas de confidencialidad, no se puede compartir el enlace público."
+  },
+  {
+    id: 2,
+    name: "Altera Bank",
+    description: "Plataforma financiera con control total del pipeline comercial y trazabilidad de leads.",
+    language: "TypeScript",
+    image: "/images/projects/altera-bank.png",
+    url: null, // Sin URL pública
+    isPrivate: true,
+    privateMessage: "Este proyecto es una plataforma bancaria privada desarrollada para Altera Bank. El acceso está restringido por seguridad."
+  },
+  {
+    id: 3,
+    name: "Altera Finance",
+    description: "Financiamiento con tasas bajas y garantía inmobiliaria para crecimiento empresarial.",
+    language: "React",
+    image: "/images/projects/altera-finance.png",
+    url: "https://www.altera.com.pe/inicio",
+    isPrivate: false
+  },
+  {
+    id: 4,
+    name: "Ascent",
+    description: "Ecosistema empresarial que convierte capital, patrimonio y tecnología en progreso.",
+    language: "Next.js",
+    image: "/images/projects/ascent.png",
+    url: "https://ascent.com.pe",
+    isPrivate: false
+  }
 ];
 
 // --- DATOS DEL CV ---
@@ -75,6 +111,89 @@ const CV_DATA = {
 };
 
 // --- COMPONENTES UI AVANZADOS ---
+
+// --- MODAL PARA PROYECTOS PRIVADOS ---
+const PrivateProjectModal = ({ project, isOpen, onClose }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 animate-in fade-in duration-300">
+      {/* Fondo oscuro */}
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative bg-zinc-950/95 border border-zinc-800 rounded-3xl max-w-lg w-full p-8 shadow-[0_0_80px_rgba(6,182,212,0.1)] animate-in slide-in-from-bottom-8 duration-500">
+        {/* Botón cerrar */}
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-white"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Icono de candado */}
+        <div className="flex justify-center mb-6">
+          <div className="p-4 bg-cyan-500/10 rounded-full border border-cyan-500/20">
+            <Lock className="w-12 h-12 text-cyan-500" />
+          </div>
+        </div>
+
+        {/* Contenido */}
+        <h3 className="text-2xl font-bold text-white text-center mb-2">
+          {project.name}
+        </h3>
+        <p className="text-zinc-400 text-center text-sm mb-6">
+          Proyecto Privado
+        </p>
+
+        <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800/50 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+            <p className="text-zinc-300 text-sm leading-relaxed">
+              {project.privateMessage}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 text-xs text-zinc-500 font-mono">
+          <div className="flex justify-between py-2 border-b border-zinc-800/50">
+            <span>Tecnología</span>
+            <span className="text-cyan-400">{project.language}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-zinc-800/50">
+            <span>Estado</span>
+            <span className="text-emerald-400">● En producción</span>
+          </div>
+          <div className="flex justify-between py-2">
+            <span>Acceso</span>
+            <span className="text-zinc-400">Restringido</span>
+          </div>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-xl transition-all hover:scale-[1.02]"
+        >
+          Entendido
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
@@ -230,10 +349,8 @@ const ThreeBackground = () => {
   useEffect(() => {
     isMounted.current = true;
     
-    // Verificar que el elemento exista
     if (!mountRef.current) return;
 
-    // 1. Configuración de Escena
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050505, 0.015);
 
@@ -248,17 +365,14 @@ const ThreeBackground = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
-    // Limpiar cualquier renderer previo
     if (mountRef.current.firstChild) {
       mountRef.current.removeChild(mountRef.current.firstChild);
     }
     mountRef.current.appendChild(renderer.domElement);
 
-    // Contenedor general para animaciones conjuntas
     const masterGroup = new THREE.Group();
     scene.add(masterGroup);
 
-    // 2. CAMPO DE DATOS (Background Particles)
     const bgParticlesGeo = new THREE.BufferGeometry();
     const bgParticlesCount = 3500;
     const bgPos = new Float32Array(bgParticlesCount * 3);
@@ -294,7 +408,6 @@ const ThreeBackground = () => {
     const bgParticlesMesh = new THREE.Points(bgParticlesGeo, bgParticlesMat);
     masterGroup.add(bgParticlesMesh);
 
-    // 3. CORE DE INTELIGENCIA ARTIFICIAL
     const coreGeo = new THREE.IcosahedronGeometry(11, 64);
     
     const coreMat = new THREE.ShaderMaterial({
@@ -398,7 +511,6 @@ const ThreeBackground = () => {
     coreMesh.position.set(12, 0, -5);
     masterGroup.add(coreMesh);
 
-    // 4. ANILLOS TECNOLÓGICOS
     const ringMat = new THREE.PointsMaterial({
         color: 0x06b6d4,
         size: 0.05,
@@ -425,7 +537,6 @@ const ThreeBackground = () => {
 
     masterGroup.add(ring1, ring2, ring3);
 
-    // --- INTERACCIONES Y ANIMACIÓN ---
     let mouse = { x: 0, y: 0 };
     let targetMouse = { x: 0, y: 0 };
     
@@ -486,7 +597,6 @@ const ThreeBackground = () => {
 
     animate();
 
-    // Cleanup completo
     return () => {
       isMounted.current = false;
       
@@ -498,17 +608,12 @@ const ThreeBackground = () => {
         animationRef.current = null;
       }
       
-      // Limpiar el DOM
       if (mountRef.current && renderer.domElement) {
         try {
           mountRef.current.removeChild(renderer.domElement);
-        // eslint-disable-next-line no-unused-vars
-        } catch (e) {
-          // Ignorar error si el elemento ya no existe
-        }
+        } catch (e) {}
       }
       
-      // Limpiar memoria de Three.js
       try {
         bgParticlesGeo.dispose();
         bgParticlesMat.dispose();
@@ -519,13 +624,8 @@ const ThreeBackground = () => {
         ringGeo3.dispose();
         ringMat.dispose();
         renderer.dispose();
-        
-        // Limpiar el canvas
         renderer.domElement.remove();
-      // eslint-disable-next-line no-unused-vars
-      } catch (e) {
-        // Ignorar errores de disposed
-      }
+      } catch (e) {}
     };
   }, []);
 
@@ -536,8 +636,9 @@ const ThreeBackground = () => {
 const App = () => {
   const containerRef = useRef(null);
   const backgroundGlowRef = useRef(null);
-  const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const lenisRef = useRef(null);
   const isMounted = useRef(true);
 
@@ -563,6 +664,12 @@ const App = () => {
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
     
+    setTimeout(() => {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }, 2500);
+    
     return () => {
       isMounted.current = false;
       gsap.ticker.remove(raf);
@@ -571,44 +678,7 @@ const App = () => {
     };
   }, []);
 
-  // Fetch repos
-  useEffect(() => {
-    const fetchRepos = async () => {
-      try {
-        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`);
-        if (!response.ok) throw new Error('API Falló');
-        const data = await response.json();
-        const filteredRepos = data.filter(repo => SELECTED_REPOS.includes(repo.name));
-        
-        if (filteredRepos.length > 0 && isMounted.current) {
-          setRepos(filteredRepos);
-        } else {
-          throw new Error('Repos no encontrados');
-        }
-      } catch (error) {
-        console.error('Error fetching repos:', error);
-        if (isMounted.current) {
-          setRepos([
-            { id: 1, name: "FineBank", description: "Plataforma financiera y gestión bancaria.", language: "TypeScript", html_url: "https://github.com/LuisMorenoMalpartida/FineBank" },
-            { id: 2, name: "VALERIA-STELLA", description: "Proyecto web desarrollado a medida.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/VALERIA-STELLA" },
-            { id: 3, name: "attendance-system", description: "Sistema automatizado para el control de asistencia.", language: "Python", html_url: "https://github.com/LuisMorenoMalpartida/attendance-system" },
-            { id: 4, name: "Entrevista_Altera-", description: "Proyecto y prueba técnica para Altera.", language: "JavaScript", html_url: "https://github.com/LuisMorenoMalpartida/Entrevista_Altera-" }
-          ]);
-        }
-      } finally {
-        if (isMounted.current) {
-          setLoading(false);
-        }
-      }
-    };
-    fetchRepos();
-    
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  // Refrescar ScrollTrigger cuando los repos terminan de cargar
+  // Refrescar ScrollTrigger
   useEffect(() => {
     if (!loading) {
       const timer = setTimeout(() => {
@@ -652,7 +722,7 @@ const App = () => {
 
   // Scroll Horizontal
   useEffect(() => {
-    if (loading || repos.length === 0 || !isMounted.current) return;
+    if (loading || !isMounted.current) return;
 
     const slider = document.querySelector(".horizontal-slider");
     const wrapper = document.querySelector(".horizontal-wrapper");
@@ -684,12 +754,29 @@ const App = () => {
       }
       tl.kill();
     };
-  }, [repos, loading]);
+  }, [loading]);
+
+  // Función para manejar clic en proyectos
+  const handleProjectClick = (project) => {
+    if (project.isPrivate) {
+      setSelectedProject(project);
+      setIsModalOpen(true);
+    } else if (project.url) {
+      window.open(project.url, '_blank');
+    }
+  };
 
   return (
     <div ref={containerRef} className="bg-[#050505] min-h-screen w-full text-zinc-300 font-sans selection:bg-cyan-500 selection:text-black overflow-hidden relative">
       <Preloader />
       <CustomCursor />
+      
+      {/* Modal de proyecto privado */}
+      <PrivateProjectModal 
+        project={selectedProject} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
       
       {/* CAPA BASE: TEXTURA Y THREE.JS */}
       <ThreeBackground />
@@ -754,38 +841,78 @@ const App = () => {
         
         <div className="absolute top-20 md:top-24 left-6 md:left-24 z-20 mix-blend-difference text-white pointer-events-none">
           <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Proyectos.</h2>
-          <p className="font-mono text-cyan-500 mt-2">// ARCHIVOS_SISTEMA</p>
+          <p className="font-mono text-cyan-500 mt-2">// ARQUITECTURAS_DESPLEGADAS</p>
         </div>
 
         <div className="horizontal-slider flex h-[60vh] md:h-[70vh] items-center gap-10 px-6 md:px-24 w-max">
-          {!loading && repos.map((repo) => (
-            <a key={repo.id} href={repo.html_url || "#"} target="_blank" rel="noreferrer" 
-               className="horizontal-slide magnetic relative flex-shrink-0 w-[85vw] md:w-[600px] h-[80%] bg-zinc-950/80 backdrop-blur-xl border border-zinc-800 rounded-3xl p-10 flex flex-col justify-between group overflow-hidden">
-              
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
-              
-              <div className="relative z-10">
-                <div className="flex justify-between items-start mb-10">
-                  <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 shadow-xl group-hover:border-cyan-500/50 transition-colors">
-                    <Code className="w-6 h-6 text-zinc-400 group-hover:text-cyan-400 transition-colors" />
-                  </div>
-                  <ExternalLink className="w-6 h-6 text-zinc-600 group-hover:text-white transition-colors transform group-hover:scale-110" />
+          {!loading && PROJECTS.map((project) => (
+            <div 
+              key={project.id} 
+              onClick={() => handleProjectClick(project)}
+              className={`horizontal-slide relative flex-shrink-0 w-[85vw] md:w-[550px] h-[80%] rounded-3xl overflow-hidden group border border-zinc-800/50 hover:border-cyan-500/50 transition-all duration-700 hover:scale-[1.02] cursor-pointer ${project.isPrivate ? 'private-project' : ''}`}
+            >
+              {/* Badge de proyecto privado */}
+              {project.isPrivate && (
+                <div className="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-500/30 flex items-center gap-2">
+                  <Lock className="w-3 h-3 text-cyan-500" />
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Privado</span>
                 </div>
-                <h3 className="text-4xl md:text-5xl font-black text-white mb-6 group-hover:-translate-y-2 transition-transform duration-500">{repo.name}</h3>
-                <p className="text-zinc-400 text-lg leading-relaxed max-w-md group-hover:text-zinc-300">{repo.description ?? "Sin descripción"}</p>
+              )}
+
+              {/* Imagen de fondo */}
+              <div className="absolute inset-0 w-full h-full">
+                <img 
+                  src={project.image}
+                  alt={project.name}
+                  className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+                {/* Overlay gradiente */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between border-t border-zinc-800 pt-6">
-                <span className="font-mono text-sm px-4 py-2 bg-zinc-900 rounded-full border border-zinc-800 text-cyan-500">{repo.language || 'Software'}</span>
-                <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest group-hover:text-cyan-400 transition-colors">EXPANDIR_</span>
+              {/* Contenido */}
+              <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between z-10">
+                <div className="flex justify-between items-start">
+                  <div className="p-3 bg-black/50 backdrop-blur-md rounded-xl border border-zinc-800/50 group-hover:border-cyan-500/50 transition-colors">
+                    <Code className="w-5 h-5 md:w-6 md:h-6 text-zinc-400 group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                  {project.isPrivate ? (
+                    <div className="p-2 bg-cyan-500/10 rounded-full border border-cyan-500/20">
+                      <Lock className="w-5 h-5 text-cyan-500" />
+                    </div>
+                  ) : (
+                    <ExternalLink className="w-5 h-5 md:w-6 md:h-6 text-zinc-600 group-hover:text-white transition-colors transform group-hover:scale-110" />
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-3xl md:text-4xl font-black text-white mb-3 group-hover:-translate-y-2 transition-transform duration-500">
+                    {project.name}
+                  </h3>
+                  <p className="text-zinc-300 text-sm md:text-base leading-relaxed max-w-md group-hover:text-zinc-200 line-clamp-2">
+                    {project.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800/50">
+                    <span className="font-mono text-xs px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full border border-zinc-800 text-cyan-500">
+                      {project.language}
+                    </span>
+                    <span className={`font-mono text-xs uppercase tracking-widest transition-colors flex items-center gap-2 ${project.isPrivate ? 'text-cyan-500' : 'text-zinc-500 group-hover:text-cyan-400'}`}>
+                      {project.isPrivate ? 'Información' : 'Ver proyecto'} 
+                      {!project.isPrivate && <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </a>
+            </div>
           ))}
-           <div className="horizontal-slide flex-shrink-0 w-[85vw] md:w-[400px] h-[80%] flex flex-col items-center justify-center text-center p-10 bg-zinc-950/80 backdrop-blur-xl border border-zinc-900 rounded-3xl">
-              <Lock className="w-10 h-10 text-cyan-900 mb-6" />
-              <h3 className="text-2xl font-bold text-white mb-4">CRMs y Privados</h3>
-              <p className="text-zinc-500">Desarrollo de plataformas internas y arquitecturas complejas bajo acuerdos de confidencialidad.</p>
-           </div>
+          
+          <div className="horizontal-slide flex-shrink-0 w-[85vw] md:w-[400px] h-[80%] flex flex-col items-center justify-center text-center p-10 bg-zinc-950/80 backdrop-blur-xl border border-zinc-900 rounded-3xl">
+            <Lock className="w-10 h-10 text-cyan-900 mb-6" />
+            <h3 className="text-2xl font-bold text-white mb-4">Próximos Proyectos</h3>
+            <p className="text-zinc-500">Desarrollo de plataformas internas y arquitecturas complejas bajo acuerdos de confidencialidad.</p>
+          </div>
         </div>
       </section>
 
