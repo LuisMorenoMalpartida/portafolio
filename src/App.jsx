@@ -58,6 +58,15 @@ const PROJECTS = [
     image: "/images/projects/ascent.png",
     url: "https://ascent.com.pe",
     isPrivate: false
+  },
+  {
+    id: 5,
+    name: "MiWasi",
+    description: "Plataforma de ahorro comunitario sin bancos. Convierte la confianza entre personas en un sistema financiero real.",
+    language: "Next.js",
+    image: "/images/projects/miwasi.png",
+    url: "https://www.miwasi.pe",
+    isPrivate: false
   }
 ];
 
