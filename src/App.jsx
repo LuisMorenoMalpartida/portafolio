@@ -7,13 +7,14 @@ import * as THREE from 'three';
 import { 
   Github, Linkedin, Mail, Terminal, Code, Cpu, 
   ExternalLink, Briefcase, ArrowRight, BookOpen, Lock,
-  X, AlertCircle
+  X, AlertCircle, Database, Wrench, Menu
 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 // --- CONFIGURACIÓN DEL USUARIO ---
 const GITHUB_USERNAME = "LuisMorenoMalpartida"; 
+const LINKEDIN_URL = "https://www.linkedin.com/in/luis-moreno-malpartida-80169a277";
 const YOUR_NAME = "LUIS MORENO";
 const YOUR_TITLE = "INGENIERO DE SOFTWARE CON I.A"; 
 const YOUR_EMAIL = "gus6bmp@gmail.com"; 
@@ -24,26 +25,32 @@ const PROJECTS = [
   {
     id: 1,
     name: "Egoa Capital",
+    category: "CRM · Real Estate",
+    year: "2025",
     description: "CRM inmobiliario para gestión de clientes, pipeline de ventas y dashboard en tiempo real.",
     language: "Next.js",
     image: "/images/projects/egoa-capital.png",
-    url: null, // Sin URL pública
+    url: null,
     isPrivate: true,
     privateMessage: "Este proyecto es un CRM privado desarrollado para Egoa Capital. Por políticas de confidencialidad, no se puede compartir el enlace público."
   },
   {
     id: 2,
     name: "Altera Bank",
+    category: "Fintech · Banca",
+    year: "2025",
     description: "Plataforma financiera con control total del pipeline comercial y trazabilidad de leads.",
     language: "TypeScript",
     image: "/images/projects/altera-bank.png",
-    url: null, // Sin URL pública
+    url: null,
     isPrivate: true,
     privateMessage: "Este proyecto es una plataforma bancaria privada desarrollada para Altera Bank. El acceso está restringido por seguridad."
   },
   {
     id: 3,
     name: "Altera Finance",
+    category: "Fintech · Web",
+    year: "2025",
     description: "Financiamiento con tasas bajas y garantía inmobiliaria para crecimiento empresarial.",
     language: "React",
     image: "/images/projects/altera-finance.png",
@@ -53,6 +60,8 @@ const PROJECTS = [
   {
     id: 4,
     name: "Ascent",
+    category: "Corporate · Web",
+    year: "2025",
     description: "Ecosistema empresarial que convierte capital, patrimonio y tecnología en progreso.",
     language: "Next.js",
     image: "/images/projects/ascent.png",
@@ -62,19 +71,22 @@ const PROJECTS = [
   {
     id: 5,
     name: "MiWasi",
+    category: "Fintech · Comunidad",
+    year: "2025",
     description: "Plataforma de ahorro comunitario sin bancos. Convierte la confianza entre personas en un sistema financiero real.",
     language: "Next.js",
     image: "/images/projects/miwasi.png",
     url: "https://www.miwasi.pe",
     isPrivate: false
   },
-  // --- NUEVO PROYECTO MOCK: COPILOT STUDIO / POWER PLATFORM ---
   {
     id: 6,
     name: "Asistente Virtual RRHH",
+    category: "IA · Low-Code",
+    year: "2026",
     description: "Asistente conversacional inteligente desarrollado con Copilot Studio y Power Platform para la automatización de consultas internas de Recursos Humanos.",
     language: "Copilot Studio / Power Platform",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1000&auto=format&fit=crop", // Placeholder de IA
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1000&auto=format&fit=crop",
     url: null,
     isPrivate: true,
     privateMessage: "Este es un proyecto interno de automatización desarrollado con Microsoft Copilot Studio y Power Platform. Debido a que maneja datos confidenciales de la empresa y está integrado en el tenant corporativo, el repositorio y el acceso público están restringidos. Se implementaron flujos de Power Automate y conexiones a Dataverse para la gestión de solicitudes."
@@ -84,6 +96,11 @@ const PROJECTS = [
 // --- DATOS DEL CV ---
 const CV_DATA = {
   about: "Ingeniero de Software con especialización en IA y experiencia en desarrollo Full Stack bajo metodología SCRUM. Perfil proactivo y orientado a resultados, enfocado en la entrega de productos de alta calidad mediante la aplicación de metodologías de Testing y Aseguramiento de Calidad (QA), incluyendo pruebas funcionales, de regresión y herramientas automatizadas para garantizar la robustez del sistema.",
+  stats: [
+    { value: "+2", label: "Años exp." },
+    { value: "6+", label: "Proyectos" },
+    { value: "100%", label: "Full Stack" }
+  ],
   skills: [
     { category: "Lenguajes", items: ["Python", "Java", "JavaScript", "TypeScript", "PHP", "HTML/CSS"] }, 
     { category: "Frameworks", items: ["React", "Next.js", "Laravel", "Angular", "Tailwind", "FastAPI", "Node.js", "GSAP", "Three.js", "Flutter"] }, 
@@ -130,7 +147,13 @@ const CV_DATA = {
   ]
 };
 
-// --- COMPONENTES UI AVANZADOS ---
+// Mapeo de íconos por categoría de skills
+const SKILL_ICONS = {
+  "Lenguajes": Code,
+  "Frameworks": Cpu,
+  "Bases / Cloud": Database,
+  "QA / DevOps / Low-Code": Wrench,
+};
 
 // --- MODAL PARA PROYECTOS PRIVADOS ---
 const PrivateProjectModal = ({ project, isOpen, onClose }) => {
@@ -145,19 +168,16 @@ const PrivateProjectModal = ({ project, isOpen, onClose }) => {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !project) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4 animate-in fade-in duration-300">
-      {/* Fondo oscuro */}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className="relative bg-zinc-950/95 border border-zinc-800 rounded-3xl max-w-lg w-full p-8 shadow-[0_0_80px_rgba(6,182,212,0.1)] animate-in slide-in-from-bottom-8 duration-500">
-        {/* Botón cerrar */}
+      <div className="relative bg-zinc-950/95 border border-zinc-800 rounded-3xl max-w-lg w-full p-8 shadow-[0_0_80px_rgba(6,182,212,0.1)]">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-white"
@@ -165,14 +185,12 @@ const PrivateProjectModal = ({ project, isOpen, onClose }) => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Icono de candado */}
         <div className="flex justify-center mb-6">
           <div className="p-4 bg-cyan-500/10 rounded-full border border-cyan-500/20">
             <Lock className="w-12 h-12 text-cyan-500" />
           </div>
         </div>
 
-        {/* Contenido */}
         <h3 className="text-2xl font-bold text-white text-center mb-2">
           {project.name}
         </h3>
@@ -215,6 +233,7 @@ const PrivateProjectModal = ({ project, isOpen, onClose }) => {
   );
 };
 
+// --- CUSTOM CURSOR ---
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const followerRef = useRef(null);
@@ -286,6 +305,7 @@ const CustomCursor = () => {
   );
 };
 
+// --- PRELOADER ---
 const Preloader = () => {
   const [progress, setProgress] = useState(0);
   const containerRef = useRef(null);
@@ -329,38 +349,80 @@ const Preloader = () => {
   );
 };
 
-const NavBar = ({ scrollToSection }) => (
-  <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50 perspective-[1000px]">
-    <div className="bg-zinc-950/70 backdrop-blur-xl border border-zinc-800/80 rounded-2xl px-6 py-4 flex items-center justify-between shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)]">
-      <div className="text-zinc-100 font-bold tracking-tighter text-lg flex items-center gap-3 cursor-pointer group magnetic" onClick={() => scrollToSection('hero')}>
-        <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 group-hover:border-cyan-500 transition-colors shadow-inner">
-          <Terminal className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+// --- NAVBAR MEJORADO ---
+const NavBar = ({ scrollToSection, activeSection }) => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  
+  return (
+    <nav className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl z-50">
+      <div className="bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 rounded-2xl px-4 md:px-6 py-3 md:py-4 flex items-center justify-between shadow-[0_20px_40px_-15px_rgba(0,0,0,0.7)]">
+        
+        {/* Logo */}
+        <div 
+          className="text-zinc-100 font-bold tracking-tighter text-lg flex items-center gap-3 cursor-pointer group magnetic" 
+          onClick={() => scrollToSection('hero')}
+        >
+          <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 group-hover:border-cyan-500 transition-colors">
+            <Terminal className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-colors" />
+          </div>
+          <span className="group-hover:text-cyan-400 transition-colors hidden sm:inline">LM.DEV</span>
         </div>
-        <span className="group-hover:text-cyan-400 transition-colors">LM.DEV</span>
+        
+        {/* Desktop nav */}
+        <div className="hidden md:flex gap-1 text-xs font-mono">
+          {['Proyectos', 'Experiencia', 'Skills'].map((item) => {
+            const isActive = activeSection === item.toLowerCase();
+            return (
+              <button 
+                key={item} 
+                onClick={() => scrollToSection(item.toLowerCase())}
+                className={`px-4 py-2 rounded-lg uppercase tracking-widest transition-all relative ${
+                  isActive ? 'text-cyan-400 bg-cyan-500/10' : 'text-zinc-500 hover:text-zinc-200'
+                }`}
+              >
+                {item}
+              </button>
+            );
+          })}
+        </div>
+        
+        {/* CTA Desktop */}
+        <button 
+          onClick={() => scrollToSection('contacto')} 
+          className="magnetic hidden md:flex bg-white hover:bg-cyan-400 text-black px-5 py-2 text-xs font-bold font-mono tracking-widest rounded-xl transition-all items-center gap-2"
+        >
+          CONTACTAR
+          <ArrowRight className="w-3 h-3" />
+        </button>
+        
+        {/* Mobile menu button */}
+        <button 
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden text-white p-2"
+        >
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+      
+      {/* Mobile dropdown */}
+      {mobileOpen && (
+        <div className="md:hidden mt-2 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl p-4 flex flex-col gap-1">
+          {['Proyectos', 'Experiencia', 'Skills', 'Contacto'].map((item) => (
+            <button 
+              key={item}
+              onClick={() => { scrollToSection(item.toLowerCase()); setMobileOpen(false); }}
+              className="text-left text-zinc-300 py-3 px-4 uppercase font-mono text-sm hover:bg-zinc-900 rounded-lg transition-colors"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      )}
+    </nav>
+  );
+};
 
-      <div className="hidden md:flex gap-10 text-xs font-medium font-mono text-zinc-500">
-        {['Proyectos', 'Experiencia', 'Skills'].map((item) => (
-          <button 
-            key={item} 
-            onClick={() => scrollToSection(item.toLowerCase())}
-            className="hover:text-zinc-200 uppercase tracking-widest relative overflow-hidden group py-1"
-          >
-            <span className="inline-block transition-transform duration-500 group-hover:-translate-y-[150%]">{item}</span>
-            <span className="absolute top-1 left-0 inline-block transition-transform duration-500 translate-y-[150%] group-hover:translate-y-0 text-cyan-400">{item}</span>
-            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-cyan-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left ease-out"></div>
-          </button>
-        ))}
-      </div>
-
-      <button onClick={() => document.getElementById('contacto')?.scrollIntoView({behavior:'smooth'})} className="magnetic bg-white hover:bg-cyan-400 hover:text-black text-black px-6 py-2 text-xs font-bold font-mono tracking-widest rounded-xl transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-        CONTACTAR
-      </button>
-    </div>
-  </nav>
-);
-
-// --- COMPONENTE THREE.JS TOTALMENTE OPTIMIZADO ---
+// --- THREE.JS BACKGROUND ---
 const ThreeBackground = () => {
   const mountRef = useRef(null);
   const animationRef = useRef(null);
@@ -370,6 +432,8 @@ const ThreeBackground = () => {
     isMounted.current = true;
     
     if (!mountRef.current) return;
+
+    const isMobile = window.innerWidth < 768;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050505, 0.015);
@@ -383,7 +447,7 @@ const ThreeBackground = () => {
       powerPreference: "high-performance" 
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 2));
     
     if (mountRef.current.firstChild) {
       mountRef.current.removeChild(mountRef.current.firstChild);
@@ -394,7 +458,7 @@ const ThreeBackground = () => {
     scene.add(masterGroup);
 
     const bgParticlesGeo = new THREE.BufferGeometry();
-    const bgParticlesCount = 3500;
+    const bgParticlesCount = isMobile ? 1000 : 3500;
     const bgPos = new Float32Array(bgParticlesCount * 3);
     const bgColors = new Float32Array(bgParticlesCount * 3);
     
@@ -428,7 +492,7 @@ const ThreeBackground = () => {
     const bgParticlesMesh = new THREE.Points(bgParticlesGeo, bgParticlesMat);
     masterGroup.add(bgParticlesMesh);
 
-    const coreGeo = new THREE.IcosahedronGeometry(11, 64);
+    const coreGeo = new THREE.IcosahedronGeometry(11, isMobile ? 24 : 64);
     
     const coreMat = new THREE.ShaderMaterial({
       uniforms: {
@@ -578,9 +642,7 @@ const ThreeBackground = () => {
     const clock = new THREE.Clock();
     
     const animate = () => {
-      if (!isMounted.current) {
-        return;
-      }
+      if (!isMounted.current) return;
       
       const elapsedTime = clock.getElapsedTime();
       const scrollY = window.scrollY || window.pageYOffset || 0;
@@ -659,6 +721,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
   const lenisRef = useRef(null);
   const isMounted = useRef(true);
 
@@ -708,6 +771,28 @@ const App = () => {
       }, 100);
       return () => clearTimeout(timer);
     }
+  }, [loading]);
+
+  // Detectar sección activa
+  useEffect(() => {
+    if (loading) return;
+    
+    const sections = ['hero', 'proyectos', 'experiencia', 'skills', 'contacto'];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { threshold: 0.4 }
+    );
+    
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    
+    return () => observer.disconnect();
   }, [loading]);
 
   // GSAP Animaciones Generales
@@ -786,73 +871,111 @@ const App = () => {
     }
   };
 
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div ref={containerRef} className="bg-[#050505] min-h-screen w-full text-zinc-300 font-sans selection:bg-cyan-500 selection:text-black overflow-hidden relative">
       <Preloader />
       <CustomCursor />
       
-      {/* Modal de proyecto privado */}
       <PrivateProjectModal 
         project={selectedProject} 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
       />
       
-      {/* CAPA BASE: TEXTURA Y THREE.JS */}
       <ThreeBackground />
       <div className="fixed inset-0 z-[1] pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
       
-      {/* Orbe Magnético 2D Trasero */}
       <div 
         ref={backgroundGlowRef} 
         className="fixed top-0 left-0 w-[400px] h-[400px] bg-cyan-900/15 rounded-full blur-[140px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[1]"
       ></div>
 
-      <NavBar scrollToSection={(id) => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }} />
+      <NavBar scrollToSection={scrollToSection} activeSection={activeSection} />
 
-      {/* HERO SECTION */}
-      <section id="hero" className="min-h-screen flex flex-col justify-center px-6 pt-20 max-w-7xl mx-auto relative z-10">
-        <div className="font-mono text-cyan-500 mb-6 text-sm flex items-center gap-2 hero-fade">
-          <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_#06b6d4]"></span>
-          [ {YOUR_TITLE} ]
+      {/* HERO SECTION MEJORADO */}
+      <section id="hero" className="min-h-screen flex flex-col justify-center px-6 pt-24 max-w-7xl mx-auto relative z-10">
+        
+        {/* Badge de disponibilidad */}
+        <div className="font-mono text-xs mb-8 hero-fade flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+            <span className="text-emerald-400 uppercase tracking-widest">Disponible para proyectos</span>
+          </div>
+          <span className="text-zinc-600 hidden sm:inline">//</span>
+          <span className="text-cyan-500">[ {YOUR_TITLE} ]</span>
         </div>
         
-        <div className="flex flex-col gap-2 mb-8">
-          <h1 className="text-6xl md:text-8xl lg:text-[11rem] font-black text-white tracking-tighter leading-[0.8] uppercase overflow-hidden py-2">
+        {/* Nombre con tipografía mejorada */}
+        <div className="flex flex-col mb-8 relative">
+          <h1 className="text-[15vw] md:text-[10rem] lg:text-[13rem] font-black text-white tracking-tighter leading-[0.85] uppercase">
             <div className="hero-mask overflow-hidden">
-              <span className="inline-block">{YOUR_NAME.split(' ')[0]}</span>
+              <span className="inline-block">LUIS</span>
             </div>
           </h1>
-          <h1 className="text-6xl md:text-8xl lg:text-[11rem] font-black tracking-tighter leading-[0.8] uppercase overflow-hidden py-2">
+          <h1 className="text-[15vw] md:text-[10rem] lg:text-[13rem] font-black tracking-tighter leading-[0.85] uppercase -mt-2 md:-mt-4">
             <div className="hero-mask overflow-hidden">
-              <span className="inline-block bg-gradient-to-r from-zinc-100 via-cyan-400 to-cyan-600 bg-clip-text text-transparent">
-                {YOUR_NAME.split(' ')[1] || YOUR_NAME}
+              <span className="inline-block bg-gradient-to-r from-cyan-400 via-cyan-500 to-purple-500 bg-clip-text text-transparent italic">
+                MORENO
               </span>
             </div>
           </h1>
         </div>
         
-        <p className="hero-fade max-w-2xl text-zinc-400 text-lg md:text-xl leading-relaxed mb-12 border-l border-cyan-900 pl-8 backdrop-blur-sm bg-black/20 py-2 rounded-r-xl">
-          {CV_DATA.about}
-        </p>
-        
-        <div className="hero-fade flex gap-8 items-center">
-          <button 
-            onClick={() => {
-              const element = document.getElementById('proyectos');
-              if (element) element.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="magnetic group flex items-center gap-4 text-white font-bold text-sm tracking-widest uppercase border-b border-white pb-2 hover:text-cyan-400 hover:border-cyan-400 transition-colors"
-          >
-            Ver Proyectos <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-          </button>
-          <div className="flex gap-4">
-            <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noreferrer" className="magnetic p-3 rounded-full border border-zinc-800 hover:bg-cyan-500 hover:border-cyan-500 hover:text-black transition-all bg-black/50 backdrop-blur-md"><Github className="w-5 h-5" /></a>
-            <a href="#" className="magnetic p-3 rounded-full border border-zinc-800 hover:bg-cyan-500 hover:border-cyan-500 hover:text-black transition-all bg-black/50 backdrop-blur-md"><Linkedin className="w-5 h-5" /></a>
+        {/* Descripción + stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <p className="hero-fade md:col-span-2 max-w-2xl text-zinc-400 text-base md:text-lg leading-relaxed border-l-2 border-cyan-500/50 pl-6">
+            {CV_DATA.about}
+          </p>
+          
+          <div className="hero-fade flex md:flex-col gap-6 md:gap-3 md:border-l md:border-zinc-800 md:pl-6">
+            {CV_DATA.stats.map((stat, i) => (
+              <div key={i}>
+                <div className={`text-3xl font-black ${i === 1 ? 'text-cyan-400' : 'text-white'}`}>
+                  {stat.value}
+                </div>
+                <div className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
+        
+        {/* CTAs y socials */}
+        <div className="hero-fade flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+          <button 
+            onClick={() => scrollToSection('proyectos')}
+            className="magnetic group flex items-center gap-3 bg-white text-black px-7 py-4 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-cyan-400 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+          >
+            Ver Proyectos 
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+          
+          <div className="flex gap-3">
+            <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noreferrer" 
+               className="magnetic p-3 rounded-full border border-zinc-800 hover:bg-cyan-500 hover:border-cyan-500 hover:text-black transition-all bg-black/50 backdrop-blur-md">
+              <Github className="w-5 h-5" />
+            </a>
+            <a href={LINKEDIN_URL} target="_blank" rel="noreferrer"
+               className="magnetic p-3 rounded-full border border-zinc-800 hover:bg-cyan-500 hover:border-cyan-500 hover:text-black transition-all bg-black/50 backdrop-blur-md">
+              <Linkedin className="w-5 h-5" />
+            </a>
+            <a href={`mailto:${YOUR_EMAIL}`}
+               className="magnetic p-3 rounded-full border border-zinc-800 hover:bg-cyan-500 hover:border-cyan-500 hover:text-black transition-all bg-black/50 backdrop-blur-md">
+              <Mail className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+        
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hero-fade">
+          <span className="font-mono text-[10px] text-zinc-600 uppercase tracking-widest">Scroll</span>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-cyan-500 to-transparent"></div>
         </div>
       </section>
 
@@ -871,14 +994,6 @@ const App = () => {
               onClick={() => handleProjectClick(project)}
               className={`horizontal-slide relative flex-shrink-0 w-[85vw] md:w-[550px] h-[80%] rounded-3xl overflow-hidden group border border-zinc-800/50 hover:border-cyan-500/50 transition-all duration-700 hover:scale-[1.02] cursor-pointer ${project.isPrivate ? 'private-project' : ''}`}
             >
-              {/* Badge de proyecto privado */}
-              {project.isPrivate && (
-                <div className="absolute top-4 right-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-500/30 flex items-center gap-2">
-                  <Lock className="w-3 h-3 text-cyan-500" />
-                  <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Privado</span>
-                </div>
-              )}
-
               {/* Imagen de fondo */}
               <div className="absolute inset-0 w-full h-full">
                 <img 
@@ -886,8 +1001,10 @@ const App = () => {
                   alt={project.name}
                   className="w-full h-full object-cover object-top transition-all duration-700 group-hover:scale-110"
                   loading="lazy"
+                  onError={(e) => { 
+                    e.target.src = `https://via.placeholder.com/600x400/0a0a0a/06b6d4?text=${encodeURIComponent(project.name)}`; 
+                  }}
                 />
-                {/* Overlay gradiente */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
@@ -895,33 +1012,52 @@ const App = () => {
               {/* Contenido */}
               <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-between z-10">
                 <div className="flex justify-between items-start">
-                  <div className="p-3 bg-black/50 backdrop-blur-md rounded-xl border border-zinc-800/50 group-hover:border-cyan-500/50 transition-colors">
-                    <Code className="w-5 h-5 md:w-6 md:h-6 text-zinc-400 group-hover:text-cyan-400 transition-colors" />
+                  {/* Índice + categoría */}
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-cyan-500 font-bold">
+                      {String(project.id).padStart(2, '0')} /
+                    </span>
+                    <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest">
+                      {project.category}
+                    </span>
                   </div>
-                  {project.isPrivate ? (
-                    <div className="p-2 bg-cyan-500/10 rounded-full border border-cyan-500/20">
-                      <Lock className="w-5 h-5 text-cyan-500" />
-                    </div>
-                  ) : (
-                    <ExternalLink className="w-5 h-5 md:w-6 md:h-6 text-zinc-600 group-hover:text-white transition-colors transform group-hover:scale-110" />
-                  )}
+                  
+                  {/* Icono estado */}
+                  <div className={`p-2 rounded-full border transition-all ${
+                    project.isPrivate 
+                      ? 'bg-cyan-500/10 border-cyan-500/30' 
+                      : 'bg-black/50 border-zinc-800 group-hover:border-cyan-500/50 group-hover:bg-cyan-500/10'
+                  }`}>
+                    {project.isPrivate ? (
+                      <Lock className="w-4 h-4 text-cyan-500" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4 text-zinc-400 group-hover:text-cyan-400 transition-colors" />
+                    )}
+                  </div>
                 </div>
 
                 <div>
-                  <h3 className="text-3xl md:text-4xl font-black text-white mb-3 group-hover:-translate-y-2 transition-transform duration-500">
+                  {/* Año */}
+                  <div className="font-mono text-xs text-zinc-500 mb-2">{project.year}</div>
+                  
+                  <h3 className="text-3xl md:text-5xl font-black text-white mb-4 group-hover:-translate-y-1 transition-transform duration-500 leading-tight">
                     {project.name}
                   </h3>
-                  <p className="text-zinc-300 text-sm md:text-base leading-relaxed max-w-md group-hover:text-zinc-200 line-clamp-2">
+                  <p className="text-zinc-400 text-sm md:text-base leading-relaxed max-w-md line-clamp-2 mb-6">
                     {project.description}
                   </p>
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-800/50">
-                    <span className="font-mono text-xs px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full border border-zinc-800 text-cyan-500">
+                  
+                  {/* Tags inferiores */}
+                  <div className="flex items-center justify-between pt-5 border-t border-zinc-800/50">
+                    <span className="font-mono text-[10px] px-3 py-1.5 bg-cyan-500/10 rounded-full border border-cyan-500/30 text-cyan-400 uppercase tracking-wider">
                       {project.language}
                     </span>
-                    <span className={`font-mono text-xs uppercase tracking-widest transition-colors flex items-center gap-2 ${project.isPrivate ? 'text-cyan-500' : 'text-zinc-500 group-hover:text-cyan-400'}`}>
-                      {project.isPrivate ? 'Información' : 'Ver proyecto'} 
-                      {!project.isPrivate && <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />}
-                    </span>
+                    <div className="flex items-center gap-2 text-zinc-500 group-hover:text-cyan-400 transition-colors">
+                      <span className="font-mono text-[10px] uppercase tracking-widest">
+                        {project.isPrivate ? 'Confidencial' : 'Explorar'}
+                      </span>
+                      <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -936,27 +1072,58 @@ const App = () => {
         </div>
       </section>
 
-      {/* EXPERIENCE SECTION */}
+      {/* EXPERIENCE SECTION - TIMELINE VERTICAL */}
       <section id="experiencia" className="py-32 px-6 max-w-6xl mx-auto relative z-10">
-        <h2 className="reveal text-4xl md:text-5xl font-black text-white mb-20 tracking-tighter uppercase text-center">
-          Trayectoria
-        </h2>
+        <div className="reveal mb-20 text-center">
+          <span className="font-mono text-xs text-cyan-500 uppercase tracking-[0.3em]">// Mi camino</span>
+          <h2 className="text-4xl md:text-6xl font-black text-white mt-4 tracking-tighter uppercase">
+            Trayectoria
+          </h2>
+        </div>
         
-        <div className="flex flex-col gap-4">
-          {CV_DATA.experience.map((job, idx) => (
-            <div key={idx} className="reveal group relative flex flex-col md:flex-row items-start md:items-center justify-between p-8 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 hover:bg-cyan-500 hover:text-black transition-all duration-500 rounded-2xl overflow-hidden cursor-default">
-              
-              <div className="relative z-10 w-full md:w-1/3 mb-4 md:mb-0">
-                <div className="font-mono text-xs text-cyan-500 group-hover:text-black font-bold mb-2 transition-colors">{job.period}</div>
-                <div className="font-black text-2xl uppercase tracking-tight">{job.company}</div>
+        <div className="relative">
+          {/* Línea vertical */}
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-zinc-800 to-transparent md:-translate-x-1/2"></div>
+          
+          <div className="flex flex-col gap-12">
+            {CV_DATA.experience.map((job, idx) => (
+              <div key={idx} className={`reveal relative flex flex-col md:flex-row gap-8 items-start ${idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                
+                {/* Punto en la timeline */}
+                <div className="absolute left-4 md:left-1/2 top-8 w-3 h-3 rounded-full bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.8)] -translate-x-1/2 z-20 border-2 border-zinc-950"></div>
+                
+                {/* Card */}
+                <div className={`w-full md:w-1/2 pl-12 md:pl-0 ${idx % 2 === 0 ? 'md:pr-16' : 'md:pl-16'}`}>
+                  <div className="group bg-zinc-900/40 backdrop-blur-md border border-zinc-800/60 rounded-2xl p-6 md:p-8 hover:border-cyan-500/50 hover:bg-zinc-900/70 transition-all duration-500 relative overflow-hidden">
+                    
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/15 transition-all"></div>
+                    
+                    <div className="flex items-start justify-between mb-4 relative z-10">
+                      <div className="font-mono text-xs text-cyan-400 font-bold">
+                        {job.period}
+                      </div>
+                      <Briefcase className="w-4 h-4 text-zinc-600 group-hover:text-cyan-500 transition-colors" />
+                    </div>
+                    
+                    <div className="text-lg md:text-xl font-black text-white mb-1 uppercase tracking-tight relative z-10">
+                      {job.company}
+                    </div>
+                    
+                    <div className="text-sm text-cyan-400 mb-4 font-medium relative z-10">
+                      {job.role}
+                    </div>
+                    
+                    <p className="text-zinc-400 text-sm leading-relaxed relative z-10">
+                      {job.desc}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Espacio vacío */}
+                <div className="hidden md:block md:w-1/2"></div>
               </div>
-              
-              <div className="relative z-10 w-full md:w-2/3">
-                <h3 className="text-xl font-bold text-white group-hover:text-black mb-3 transition-colors">{job.role}</h3>
-                <p className="text-zinc-400 group-hover:text-zinc-800 text-sm md:text-base leading-relaxed transition-colors max-w-2xl">{job.desc}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -964,24 +1131,42 @@ const App = () => {
       <section id="skills" className="py-32 px-6 max-w-7xl mx-auto relative z-10 border-t border-zinc-900/50 bg-black/40 backdrop-blur-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="reveal col-span-1 md:col-span-2 lg:col-span-4 mb-10">
-             <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">Stack Técnico.</h2>
+             <span className="font-mono text-xs text-cyan-500 uppercase tracking-[0.3em]">// Herramientas</span>
+             <h2 className="text-4xl md:text-5xl font-black text-white mt-4 tracking-tighter uppercase">Stack Técnico.</h2>
           </div>
           
-          {CV_DATA.skills.map((skillGroup, idx) => (
-            <div key={idx} className="reveal magnetic bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 hover:border-cyan-500/50 hover:bg-zinc-900/90 transition-colors duration-300">
-              <Cpu className="w-8 h-8 text-cyan-500 mb-6" />
-              <h3 className="font-mono text-zinc-100 text-sm uppercase tracking-widest mb-6 border-b border-zinc-800 pb-4">
-                {skillGroup.category}
-              </h3>
-              <ul className="flex flex-wrap gap-2">
-                {skillGroup.items.map((item, i) => (
-                  <li key={i} className="px-3 py-1.5 bg-black border border-zinc-800 rounded-lg text-sm text-zinc-300 hover:text-cyan-400 hover:border-cyan-500/50 transition-colors">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {CV_DATA.skills.map((skillGroup, idx) => {
+            const IconComponent = SKILL_ICONS[skillGroup.category] || Cpu;
+            return (
+              <div 
+                key={idx} 
+                className="reveal magnetic bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 hover:border-cyan-500/50 hover:bg-zinc-900/90 transition-all duration-300 group"
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3 bg-black border border-zinc-800 rounded-xl group-hover:border-cyan-500/50 transition-colors">
+                    <IconComponent className="w-6 h-6 text-cyan-500" />
+                  </div>
+                  <span className="font-mono text-xs text-zinc-700 group-hover:text-cyan-500 transition-colors">
+                    {String(skillGroup.items.length).padStart(2, '0')}
+                  </span>
+                </div>
+                
+                <h3 className="font-mono text-zinc-100 text-sm uppercase tracking-widest mb-6 border-b border-zinc-800 pb-4">
+                  {skillGroup.category}
+                </h3>
+                <ul className="flex flex-wrap gap-2">
+                  {skillGroup.items.map((item, i) => (
+                    <li 
+                      key={i} 
+                      className="px-3 py-1.5 bg-black border border-zinc-800 rounded-lg text-xs text-zinc-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all cursor-default"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
 
           {/* Education Box */}
           <div className="reveal col-span-1 md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -999,20 +1184,52 @@ const App = () => {
         </div>
       </section>
 
-      {/* FOOTER / CONTACT */}
-      <section id="contacto" className="py-40 px-6 border-t border-zinc-900 bg-black/80 backdrop-blur-xl text-center relative overflow-hidden z-10">
-        <div className="reveal max-w-4xl mx-auto relative z-10">
-          <h2 className="text-6xl md:text-[8rem] font-black text-white mb-10 tracking-tighter uppercase leading-none">
-            Let's Talk.
+      {/* FOOTER / CONTACT MEJORADO */}
+      <section id="contacto" className="py-40 px-6 border-t border-zinc-900 bg-gradient-to-b from-black/80 to-zinc-950 backdrop-blur-xl relative overflow-hidden z-10">
+        
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+        
+        <div className="reveal max-w-4xl mx-auto relative z-10 text-center">
+          
+          <span className="font-mono text-xs text-cyan-500 uppercase tracking-[0.3em]">// ¿Trabajamos juntos?</span>
+          
+          <h2 className="text-5xl md:text-8xl lg:text-[9rem] font-black text-white mt-6 mb-8 tracking-tighter uppercase leading-[0.85]">
+            Hablemos
+            <span className="text-cyan-500">.</span>
           </h2>
           
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <a href={`mailto:${YOUR_EMAIL}`} className="magnetic bg-white text-black px-10 py-6 font-bold text-sm tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:scale-105 hover:bg-cyan-500 hover:text-black transition-all shadow-[0_0_25px_rgba(255,255,255,0.1)]">
-              <Mail className="w-5 h-5" /> Enviar Email
+          <p className="text-zinc-400 text-lg max-w-xl mx-auto mb-12">
+            Estoy abierto a oportunidades de desarrollo Full Stack, proyectos de IA y colaboraciones técnicas. Respondo en menos de 24 horas.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a 
+              href={`mailto:${YOUR_EMAIL}`} 
+              className="magnetic group bg-white text-black px-8 py-5 font-bold text-xs tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:bg-cyan-400 transition-all hover:scale-105"
+            >
+              <Mail className="w-4 h-4" /> 
+              Enviar Email
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a href={`https://wa.me/${YOUR_PHONE.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="magnetic bg-transparent border border-zinc-700 text-white px-10 py-6 font-bold text-sm tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:border-cyan-500 hover:text-cyan-400 hover:scale-105 transition-all bg-black/50">
+            
+            <a 
+              href={`https://wa.me/${YOUR_PHONE.replace(/[^0-9]/g, '')}`} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="magnetic group bg-transparent border border-zinc-700 text-white px-8 py-5 font-bold text-xs tracking-widest uppercase rounded-full flex items-center justify-center gap-3 hover:border-cyan-500 hover:text-cyan-400 transition-all"
+            >
               WhatsApp
             </a>
+          </div>
+          
+          {/* Footer info */}
+          <div className="mt-20 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-xs text-zinc-600">
+            <div>© 2026 Luis Moreno. Todos los derechos reservados.</div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              Disponible para trabajar
+            </div>
+            <div>Hecho con React + Three.js</div>
           </div>
         </div>
       </section>
