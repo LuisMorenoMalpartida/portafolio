@@ -67,6 +67,17 @@ const PROJECTS = [
     image: "/images/projects/miwasi.png",
     url: "https://www.miwasi.pe",
     isPrivate: false
+  },
+  // --- NUEVO PROYECTO MOCK: COPILOT STUDIO / POWER PLATFORM ---
+  {
+    id: 6,
+    name: "Asistente Virtual RRHH",
+    description: "Asistente conversacional inteligente desarrollado con Copilot Studio y Power Platform para la automatización de consultas internas de Recursos Humanos.",
+    language: "Copilot Studio / Power Platform",
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1000&auto=format&fit=crop", // Placeholder de IA
+    url: null,
+    isPrivate: true,
+    privateMessage: "Este es un proyecto interno de automatización desarrollado con Microsoft Copilot Studio y Power Platform. Debido a que maneja datos confidenciales de la empresa y está integrado en el tenant corporativo, el repositorio y el acceso público están restringidos. Se implementaron flujos de Power Automate y conexiones a Dataverse para la gestión de solicitudes."
   }
 ];
 
@@ -77,7 +88,7 @@ const CV_DATA = {
     { category: "Lenguajes", items: ["Python", "Java", "JavaScript", "TypeScript", "PHP", "HTML/CSS"] }, 
     { category: "Frameworks", items: ["React", "Next.js", "Laravel", "Angular", "Tailwind", "FastAPI", "Node.js", "GSAP", "Three.js", "Flutter"] }, 
     { category: "Bases / Cloud", items: ["MySQL", "MongoDB", "PostgreSQL", "Supabase", "Neon", "AWS", "Azure"] }, 
-    { category: "QA / DevOps", items: ["Selenium", "Postman", "JMeter", "PHPUnit", "Docker", "Vercel", "Scrum"] } 
+    { category: "QA / DevOps / Low-Code", items: ["Selenium", "Postman", "JMeter", "PHPUnit", "Docker", "Vercel", "Scrum", "Power Platform", "Copilot Studio"] } 
   ],
   experience: [
     {
